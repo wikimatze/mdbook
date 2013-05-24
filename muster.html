@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head> <script type="text/javascript">
+//<![CDATA[
+try{if (!window.CloudFlare) { var CloudFlare=[{verbose:0,p:0,byc:0,owl:0,mirage:0,oracle:0,paths:{cloudflare:"/cdn-cgi/nexp/v=174003646/"},atok:"826a06e9e00aec897fe230dde1958833",zone:"stevelosh.com",rocket:"a",apps:{}}];document.write('<script type="text/javascript" src="//ajax.cloudflare.com/cdn-cgi/nexp/v=840670951/cloudflare.min.js"><'+'\/script>')}}catch(a){};
+//]]>
+</script>
+
+        <meta charset="utf-8">
+        <title>Echoing Messages / Learn Vimscript the Hard Way</title>
+
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/rocketscript" data-rocketsrc="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+
+                <h1><a href="/">Learn Vimscript the Hard Way</a></h1>
+            </header>
+
+
+    <section class="nav three columns">
+
+<ul><li><a href="#echoing-messages">Echoing Messages</a><ul><li><a href="#persistent-echoing">Persistent Echoing</a></li>
+<li><a href="#comments">Comments</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul></li>
+
+</ul>
+
+        <div class="prevnext">
+
+                <a class="prev" href="/chapters/00.html">&laquo; Prev</a>
+
+
+                <a class="next" href="/chapters/02.html">Next &raquo;</a>
+
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+
+        <div>
+<h1 id="echoing-messages">Echoing Messages</h1>
+<p>The first piece of Vimscript we'll look at is <code>echom</code>.</p>
+<p>You can read the full documentation for the command by running <code>:help echom</code> in
+Vim.  As you go through this book you should try to read the <code>:help</code> for every
+new command you encounter to get a better understanding of how to use each one.</p>
+<p>Run the following command:</p>
+
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="c">"Hello, world!"</span>
+</pre></div>
+
+
+<p>You should see <code>Hello, world!</code> appear at the bottom of the window.</p>
+<h2 id="persistent-echoing">Persistent Echoing</h2>
+<p>Now run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="c">"Hello again, world!"</span>
+
+</pre></div>
+
+
+<p>You should see <code>Hello again, world!</code> appear at the bottom of the window.</p>
+<p>To see the difference between these two commands, run one more new command:</p>
+<div class="codehilite"><pre><span class="p">:</span>messages
+</pre></div>
+
+
+<p>You should see a list of messages.  <code>Hello, world!</code> will <em>not</em> be in this list,
+but <code>Hello again, world!</code> <em>will</em> be in it.</p>
+
+<p>When you're writing more complicated Vim scripts later in this book you may find
+yourself wanting to "print some output" to help you debug problems.  Plain old
+<code>:echo</code>will print output, but it will often disappear by the time your script is
+done.  Using <code>:echom</code> will save the output and let you run <code>:messages</code> to view
+it later.</p>
+<h2 id="comments">Comments</h2>
+<p>Before we move on we should mention comments.  When you write Vimscript code (in
+your <code>~/.vimrc</code> file or another one) you can add comments with the <code>"</code>
+
+character, like this:</p>
+<div class="codehilite"><pre><span class="c">" Make space more useful</span>
+nnoremap <span class="p">&lt;</span>space<span class="p">&gt;</span> za
+</pre></div>
+
+
+<p>This doesn't <em>always</em> work (that's one of those ugly corners of Vimscript), but
+in most cases it does, and we'll talk about when it won't (and why that
+happens).</p>
+<h2 id="exercises">Exercises</h2>
+
+<p>Read <code>:help echo</code>.</p>
+<p>Read <code>:help echom</code>.</p>
+<p>Read <code>:help messages</code>.</p>
+<p>Add a line to your vimrc file that displays a friendly ASCII-art cat (<code>&gt;^.^&lt;</code>)
+whenever you open Vim.</p></div>
+
+        <div class="prevnext">
+
+                <a class="prev" href="/chapters/00.html">&laquo; Previous</a>
+
+
+                <a class="next" href="/chapters/02.html">Next &raquo;</a>
+
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+
+                Made by <a href="http://stevelosh.com">Steve Losh</a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+
+            <script type="text/rocketscript">
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-15328874-8']);
+                _gaq.push(['_trackPageview']);
+
+                (function() {
+                 var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                 ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                 })();
+            </script>
+
+
+
+            <script type="text/rocketscript">
+                var _gauges = _gauges || [];
+                (function() {
+                 var t   = document.createElement('script');
+                 t.type  = 'text/javascript';
+                 t.async = true;
+                 t.id    = 'gauges-tracker';
+                 t.setAttribute('data-site-id', '4e8f83b7f5a1f546e200000d');
+                 t.src = '//secure.gaug.es/track.js';
+                 var s = document.getElementsByTagName('script')[0];
+                 s.parentNode.insertBefore(t, s);
+                 })();
+             </script>
+
+
+    </body>
+</html>
