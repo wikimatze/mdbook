@@ -17,10 +17,11 @@ class HTMLwithPygments < Redcarpet::Render::HTML
     Pygments.highlight(code, :lexer => language, :encoding => 'utf-8')
   end
 
-#   def preprocess(full_document)
-#     full_document.gsub!('%%', 'arsch')
-#     full_document
-#   end
+  def preprocess(full_document)
+    # remove strings of the form %%/* vim: set ts=2 sw=2 textwidth=120: */
+    full_document.gsub!(/%%.*/, '')
+    full_document
+  end
 
 end
 
