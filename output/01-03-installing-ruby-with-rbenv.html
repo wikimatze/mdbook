@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset=utf-8" />
+    <title>Muss noch gemacht werden und dynamisch gesetzt sein </title>
+    <meta name="author" content="Matthias Guenther" />
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
+    <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
+    <style text="text/css"></style>
+  </head>
+
+  <body>
+    <div id="content">
+      
+<a name="2-Installing-Ruby-With-rbenv" class="anchor" href="#2-Installing-Ruby-With-rbenv"><span class="anchor-icon">aa</span></a><h2 id="2-Installing-Ruby-With-rbenv">Installing Ruby With rbenv</h2>
+
+<p>Instead of using the build-in software package for Ruby of your operating system, we will use
+<a href="https://github.com/sstephenson/rbenv/" title="rbenv">rbenv</a> which lets you switch between multiple versions of Ruby.</p>
+
+<p>First, we need to use <a href="http://git-scm.org">git</a> to get the current version of rbenv:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ cd $HOME
+    $ git clone git://github.com/sstephenson/rbenv.git .rbenv</p>
+
+<p>In case you shouldn&#39;t want to use git, you can also download the latest version as a zip file from
+<a href="http://github.com">Github</a>.</p>
+
+<p>You need to add the directory that contains rbenv to your <code>$PATH</code>environment variable.  If you are on Mac, you have
+to replace <code>.bashrc</code> with <code>.bash_profile</code> in all of the following commands):</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ echo &#39;export PATH=&quot;$HOME/.rbenv/bin:$PATH&quot;&#39; &gt;&gt; ~/.bashrc</p>
+
+<p>To enable auto completion for <code>rbenv</code> commands, we need to perform the following command:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ echo &#39;eval &quot;$(rbenv init -)&quot;&#39; &gt;&gt; ~/.bashrc</p>
+
+<p>Next, we need to restart our shell to enable the last changes:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ exec $SHELL</p>
+
+<p>Basically, there are two ways to install different versions of Ruby: You can compile Ruby on your
+own and try to manage the versions and gems on your own, or you use a tool that helps you.</p>
+
+<a name="3-ruby-build" class="anchor" href="#3-ruby-build"><span class="anchor-icon">aa</span></a><h3 id="3-ruby-build">ruby-build</h3>
+
+<p>Because we don&#39;t want to download and compile different Ruby versions on our own, we will use
+<a href="https://github.com/sstephenson/ruby-build" title="ruby-build">ruby-build</a> plugin for rbenv:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ mkdir ~/.rbenv/plugins
+    $ cd ~/.rbenv/plugins
+    $ git clone git://github.com/sstephenson/ruby-build.git</p>
+
+<p>If you now run <code>rbenv install</code> you can see all the different Ruby version you can install and use for different Ruby
+projects. We are going to install <code>ruby 1.9.3-p392</code>:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ rbenv install 1.9.3-p392</p>
+
+<p>This command will take a couple of minutes, so it&#39;s best to grab a Raider, which is now known as
+<a href="http://en.wikipedia.org/wiki/Twix" title="Twix">Twix</a>.  After everything runs fine, you have to run <code>rbenv rehash</code> to rebuild
+the internal rbenv libraries. The last step is to makeRuby 1.9.3-p392 the current executable on your machine:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ rbenv global 1.9.3-p392</p>
+
+<p>Check that the correct executable is active by exexuting <code>ruby -v</code>. The output should look like:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ 1.9.3-p392 (set by /home/.rbenv/versions)</p>
+
+<p>Now you are a &quot;rookie&quot; <a href="http://rubyrogues.com/" title="Ruby Rouges">Ruby Rogue</a>.</p>
+
+<a name="3-Compiling-Ruby-On-Your-Own" class="anchor" href="#3-Compiling-Ruby-On-Your-Own"><span class="anchor-icon">aa</span></a><h3 id="3-Compiling-Ruby-On-Your-Own">Compiling Ruby On Your Own</h3>
+
+<p>If you want to compile a different version of Ruby that is not offered with rbenv, then make sure you have
+the following packages installed for your os: <code>make, g++, wget</code> and <code>unzip</code>. Continue to select your preferred
+<a href="http://ftp.ruby-lang.org/pub/ruby/" title="ruby versions">Ruby versions </a> and then download the appropriate package:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ cd ~/.rbenv/versions
+    $ wget http://ftp.ruby-lang.org/pub/ruby/ruby-1.9.3-p392.zip</p>
+
+<p>Go to the directory <code>.rbenv/versions</code> where you will find the downloaded file. Next unzip the file:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ unzip ruby-1.9.3-p392.zip</p>
+
+<p>Configure the compilation and perform the installation:</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ cd ~/.rbenv/versions
+    $ ./configure --prefix=$HOME/.rbenv/versions/ruby-1.9.3.p392
+    $ make
+    $ make install</p>
+
+<p>Following these steps, you gain knowledge about the whole process of configuration and compilation
+of custom Ruby versions. However, this doesn&#39;t always work:&#39;</p>
+
+<p>{: lang=&quot;bash&quot; }
+    $ ruby -v
+    Segmentation fault</p>
+
+<p>If you want to be on the safe side, then use ruby-build.</p>
+
+<p>%%/* vim: set ts=2 sw=2 textwidth=120: */</p>
+
+    </div>
+  </body>
+
+</html>
+
