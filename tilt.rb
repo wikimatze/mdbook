@@ -17,10 +17,10 @@ class HTMLwithPygments < Redcarpet::Render::HTML
     Pygments.highlight(code, :lexer => language, :encoding => 'utf-8')
   end
 
-  def preprocess(full_document)
-    full_document.gsub!('%%', 'arsch')
-    full_document
-  end
+#   def preprocess(full_document)
+#     full_document.gsub!('%%', 'arsch')
+#     full_document
+#   end
 
 end
 
@@ -40,12 +40,6 @@ CHAPTERS.each do |chapter|
   chapter_file = File.open(chapter, 'r')
   chapter_path = chapter_file.path
 
-  tmp = chapter_file
-#
-    html_toc = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC).render(tmp.read)
-    puts html_toc
-#
-#    puts html_toc
   # Inspiration: http://net.tutsplus.com/tutorials/ruby/ruby-for-newbies-the-tilt-gem/
   context = Object.new
   links = ChapterLinks.new
@@ -81,19 +75,30 @@ CHAPTERS.each do |chapter|
 
 #   binding.pry
 
-  def format(link)
-    link.gsub('md', 'html').gsub('chapters', '/output')
+
+  text = ""
+  body = chapter_file.readlines
+
+  indicator = false
+  body.each_with_index do |line, number|
+    if line =~ /{(:.*=)(".*").*/
+      text << "```#{$2.gsub("\"", '')}\n"
+      indicator = true
+    elsif body[number] == "\n" && body[number+1] == "\n" && indicator
+      text << "```\n\n"
+      indicator = false
+    else
+      text << line
+    end
   end
+
+
   # rendering the markdown file with custom renderer
-  # the context is custom variable
+  # the context is custom variable, with other attributes which can be used in the ERB template file
   # the block statement will replace the yield block in the template
   output = tilt.render(context, :next_link => next_links(links), :previous_link => previous_link(links)) do
-    markdown.render(chapter_file.read)
+    markdown.render(text)
   end
-#   puts output
-
-#    markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(:with_toc_data => true))
-#   html = markdown.render(output)
 
   # define the place, where the output should be written
   output_path = generate_output_path(chapter_path)
