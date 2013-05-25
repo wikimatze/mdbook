@@ -35,7 +35,6 @@ class ChapterLinks
     end
     @between_chapter
   end
-
 end
 
 links = ChapterLinks.new

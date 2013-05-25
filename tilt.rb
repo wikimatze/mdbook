@@ -1,10 +1,16 @@
+# Gems
 require 'tilt'
 require 'pry'
 require 'github/markup'
 require 'pygments.rb'
 
+# local classes
+require './chapter_links'
+
 CHAPTER_DIRECTORY = "chapters"
 OUTPUT_DIRECTORY = "output"
+CHAPTERS = Dir["#{CHAPTER_DIRECTORY}/**/**"].sort
+
 
 class HTMLwithPygments < Redcarpet::Render::HTML
   def block_code(code, language)
@@ -43,8 +49,9 @@ markdown = Redcarpet::Markdown.new(HTMLwithPygments, :fenced_code_blocks => true
 
 tilt = Tilt.new("layouts/default.html.erb")
 
+
 # go through each chapter
-Dir["#{CHAPTER_DIRECTORY}/**/**"].each do |chapter|
+CHAPTERS.each do |chapter|
   # open the chapter
   chapter_file = File.open(chapter, 'r')
   chapter_path = chapter_file.path
@@ -57,18 +64,46 @@ Dir["#{CHAPTER_DIRECTORY}/**/**"].each do |chapter|
 #    puts html_toc
   # Inspiration: http://net.tutsplus.com/tutorials/ruby/ruby-for-newbies-the-tilt-gem/
   context = Object.new
-  def context.title
-    "Tuts+ Sites"
+  links = ChapterLinks.new
+
+  if links.first_chapter?(CHAPTERS, chapter)
+    links.next_link = CHAPTERS[links.next_link]
+  elsif links.between_chapter?(CHAPTERS, chapter)
+    links.previous_link = CHAPTERS[links.previous_link]
+    links.next_link = CHAPTERS[links.next_link]
+  elsif links.last_chapter?(CHAPTERS, chapter)
+    links.previous_link = CHAPTERS[links.previous_link]
   end
 
-#   def context.toc
-#     html_toc
-#   end
+  def next_links(links)
+    if links.first_chapter
+      links.next_link
+    elsif links.between_chapter
+      links.next_link
+    else
+      nil
+    end
+  end
 
+  def previous_link(links)
+    if links.last_chapter
+      links.previous_link
+    elsif links.between_chapter
+      links.previous_link
+    else
+      nil
+    end
+  end
+
+#   binding.pry
+
+  def format(link)
+    link.gsub('md', 'html').gsub('chapters', '/output')
+  end
   # rendering the markdown file with custom renderer
   # the context is custom variable
   # the block statement will replace the yield block in the template
-  output = tilt.render do
+  output = tilt.render(context, :next_link => next_links(links), :previous_link => previous_link(links)) do
     markdown.render(chapter_file.read)
   end
 #   puts output
@@ -76,10 +111,6 @@ Dir["#{CHAPTER_DIRECTORY}/**/**"].each do |chapter|
 #    markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(:with_toc_data => true))
 #   html = markdown.render(output)
 
-  html_toc = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC)
-#   markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(:with_toc_data => true))
-  toc  = html_toc.render(chapter_file.read)
-  html = markdown.render(chapter_file.read)
   # define the place, where the output should be written
   output_path = generate_output_path(chapter_path)
 
