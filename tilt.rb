@@ -17,6 +17,11 @@ class HTMLwithPygments < Redcarpet::Render::HTML
     Pygments.highlight(code, :lexer => language, :encoding => 'utf-8')
   end
 
+  def preprocess(full_document)
+    full_document.gsub!('%%', 'arsch')
+    full_document
+  end
+
   def header(title, level)
     @headers ||= []
     # you can use this permalink style: 1-foo-bar with the level in it
@@ -36,7 +41,7 @@ class HTMLwithPygments < Redcarpet::Render::HTML
       end
     end
     @headers << permalink
-    %(\n<a name="#{permalink}" class="anchor" href="##{permalink}"><span class="anchor-icon">aa</span></a><h#{level} id=\"#{permalink}\">#{title}</h#{level}>\n)
+    %(\n<a name="#{permalink}" class="anchor" href="##{permalink}"><span class="anchor-icon">#{title}</span></a><h#{level} id=\"#{permalink}\">#{title}</h#{level}>\n)
   end
 end
 
