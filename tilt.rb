@@ -8,7 +8,7 @@ require 'pygments.rb'
 require './chapter_links'
 
 CHAPTER_DIRECTORY = "chapters"
-OUTPUT_DIRECTORY = "output"
+OUTPUT_DIRECTORY = "../_site"
 CHAPTERS = Dir["#{CHAPTER_DIRECTORY}/**/**"].sort
 
 
@@ -80,6 +80,11 @@ CHAPTERS.each do |chapter|
   text = ""
   body = chapter_file.readlines
 
+  # Indicators for I> infoboxes
+  indicator_one = false
+  indicator_two = false
+
+  # Indicator for {: lang="bash" } code blocks
   indicator = false
   body.each_with_index do |line, number|
     if line =~ /{(:.*=)(".*").*/
@@ -88,6 +93,15 @@ CHAPTERS.each do |chapter|
     elsif body[number] == "\n" && body[number+1] == "\n" && indicator
       text << "```\n\n"
       indicator = false
+    # info box I> checking
+    elsif line =~ /(I>)(.*)/ and indicator_one == false and indicator_two == false
+      text << "<div class=\"active-box\">\n<h3>#{$2.gsub("#", '')}</h3>\n"
+      indicator_one = true
+    elsif indicator_one and indicator_two == false and body[number+0] == "\n"
+      text << "\n</div>\n\n"
+      indicator_two = true
+    elsif indicator_one and line.start_with?('I>')
+      text << $2
     else
       text << line
     end
