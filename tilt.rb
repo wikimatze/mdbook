@@ -103,13 +103,20 @@ CHAPTERS.each do |chapter|
       indicator = false
     # info box I> checking
     elsif line =~ /(I>)(.*)/ and indicator_one == false and indicator_two == false
-      text << "<div class=\"active-box\">\n<h3>#{$2.gsub("#", '')}</h3>\n"
+      text << "<div class=\"info-box\">\n<h3>#{$2.gsub("#", '')}</h3>\n"
       indicator_one = true
     elsif indicator_one and indicator_two == false and body[number+0] == "\n"
       text << "\n</div>\n\n"
-      indicator_two = true
+      indicator_one = false
+      indicator_two = false
     elsif indicator_one and line.start_with?('I>')
-      text << $2
+      if line =~ /(.*)(\[)(.*)(\])(\()(.*)(\))(.*)/
+        text << "#{$1} <a href=\"#{$6}\">#{$3}</a>#{$8}"
+      elsif line =~ /(.*)(\`)(.*)(\`)(.*)/
+        text << "#{$1}<code>#{$3}</code>#{$5}"
+      else
+        text << line
+      end
     else
       text << line
     end
