@@ -20,9 +20,17 @@ class HTMLwithPygments < Redcarpet::Render::HTML
   def preprocess(full_document)
     # remove strings of the form %%/* vim: set ts=2 sw=2 textwidth=120: */
     full_document.gsub!(/%%.*/, '')
+    # removes
+    full_document.gsub!(/\[\^.*\]:.*/,'')
+    # removes footnote start [^KISS]
+    full_document.gsub!(/\[\^.*\]/,'')
     full_document
   end
 
+  def postprocess(full_document)
+    full_document.gsub!("I>", '')
+    full_document
+  end
 end
 
 def generate_output_path(path)
