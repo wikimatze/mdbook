@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset=utf-8" />
+    <title>Muss noch gemacht werden und dynamisch gesetzt sein </title>
+    <meta name="author" content="Matthias Guenther" />
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
+    <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+
+    <style text="text/css">
+      /*
+       * jquery.tocify.css 1.4.0
+       * Author: @gregfranko
+       */
+
+      /* The Table of Contents container element */
+      #toc {
+          width: 20%;
+          max-height: 90%;
+          overflow: auto;
+          margin-left: -22%;
+          position: fixed;
+          border: 1px solid #ccc;
+          webkit-border-radius: 6px;
+          moz-border-radius: 6px;
+          border-radius: 6px;
+      }
+
+      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
+      #toc ul, #toc li {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          line-height: 30px;
+      }
+
+      /* Top level header elements */
+      .header {
+          text-indent: 10px;
+      }
+
+      /* Top level subheader elements.  These are the first nested items underneath a header element. */
+      .sub-header {
+          text-indent: 20px;
+          display: none;
+      }
+
+      /* Makes the font smaller for all subheader elements. */
+      .sub-header li {
+          font-size: 12px;
+      }
+
+      /* Further indents second level subheader elements. */
+      .sub-header .sub-header {
+          text-indent: 30px;
+      }
+
+      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
+      .sub-header .sub-header .sub-header {
+          text-indent: 40px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a, .nav-list .nav-header {
+          margin: 0px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a {
+          padding: 5px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+  <div id="toc"></div>
+    <div id="content">
+
+      <div class="prevnext">
+          <a class="prev" href="/output/02-00-job-vacancy-application.html">&laquo; Prev</a>
+          <a class="next" href="/output/02-02-creation-of-models.html">Next &raquo;</a>
+      </div>
+
+      <h2>Creating a new application</h2>
+
+<p>Start with generating a new project with the canonical <code>padrino</code> command. In contrast to our &quot;Hello World!&quot; application
+(app) before, we are using new options:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>mkdir ~/padrino-projects
+    <span class="nv">$ </span><span class="nb">cd</span> ~/padrino_projects
+    <span class="nv">$ </span>padrino g project job-vacancy -d activerecord -t rspec -s jquery -e erb -a sqlite
+</pre></div>
+<p>Explanation of the fields commands:</p>
+
+<ul>
+<li><strong>g</strong>: Is shortcut for <code>generate</code>.</li>
+<li><strong>-d activerecord</strong>: We are using <a href="https://rubygems.org/gems/activerecord" title="Active Record">Active Record</a> as the orm
+library (<em>Object Relational Mapper</em>).</li>
+<li><strong>-t rspec</strong>: We are using the <a href="https://github.com/dchelimsky/rspec/wiki/get-in-touch" title="RSpec">RSpec</a> testing
+framework.</li>
+<li><strong>-s jquery</strong>: Defining the JavaScript library we are using - for this app will be using the ubiquitous
+<a href="http://jquery.com/" title="jQuery">jQuery</a> library.</li>
+<li><strong>-e erb</strong>: We are using <a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/erb/rdoc/ERB.html" title="ERB">ERB</a> (<em>embedded ruby</em>)
+markup for writing HTML templates. An alternative is <a href="http://haml.info/" title="Haml">Haml</a> or <a href="http://slim-lang.com/" title="Slim">Slim</a>, but to keep the project as simple as possible, we stick with ERB. Feel free to use them if you like to.</li>
+<li><strong>-a sqlite</strong>: Our ORM[^orm] database adapter is <a href="http://www.sqlite.org/" title="SQLite">sqlite</a>. It is easy to install
+because the whole database is saved in a text file.</li>
+</ul>
+
+<p>Since we are using RSpec for testing, we will use its&#39; built-in mock extensions
+<a href="https://github.com/rspec/rspec-mocks" title="rspec mocks">rspec-mocks</a> for writing tests later. In case you want to use
+another mocking library like <a href="https://rubygems.org/gems/rr" title="rr">rr</a> or <a href="http://gofreerange.com/mocha/docs/" title="mocha">mocha</a>, feel free to add it with the <strong>-m</strong> option.</p>
+
+<p>You can use a vast array of other options when generating your new Padrino app, this table shows the currently available
+options:</p>
+
+<p>|Component | Default | Aliases | Options                                                                      |
+|----------|---------|---------|------------------------------------------------------------------------------|
+|orm       | none    | -d      | mongoid, activerecord, datamapper, couchrest, mongomatic, ohm, ripple, sequel|
+|test      | none    | -t      | bacon, shoulda, cucumber, testspec, riot, rspec, minitest                    |
+|script    | none    | -s      | prototype, rightjs, jquery, mootools, extcore, dojo                          |
+|renderer  | haml    | -e      | erb, haml, slim, liquid                                                      |
+|stylesheet| none    | -c      | sass, less, scss, compass                                                    |
+|mock      | none    | -m      | rr, mocha                                                                    |</p>
+
+<p>Besides the <code>project</code> option for generating new Padrino apps, the following table illustrates the other generators
+available:</p>
+
+<p>|Option     | Description
+|-----------|------------------------------------------------------------------------------------------------|
+|project    | Generates a completely new app from the scratch.                                               |
+|app        | You can define other apps to be mounted in your main app.                                      |
+|mailer     | Creating new mailers within your app.                                                          |
+|controller | A controller takes date from the models and puts them into view that are rendered.             |
+|model      | Models describe data objects of your application.                                              |
+|migration  | Migrations simplify changing the database schema.                                              |
+|plugin     | Creating new Padrino projects based on a template file - it&#39;s like a list of commands.         |
+|           | which create your new app.                                                                     |
+|admin      | A very nice built-in admin dashboard.                                                          |
+|admin_page | Creates for an existing model the CRUD operation for the admin interface                       |</p>
+
+<p>Later, when <em>the time comes</em>, we will add extra gems, for now though we&#39;ll grab the current gems using
+<code>bundle</code> by running at the command line:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>bundle install
+</pre></div>
+<h3>Basic Layout Template</h3>
+
+<p>Lets design our first version of the <em>index.html</em> page which is the starter page our app. An early design
+question is: Where to put the <em>index.html</em> page? Because we are not working with controllers, the easiest thing is to
+put the <em>index.html</em> directly under the public folder in the project.</p>
+
+<p>We are using <a href="http://en.wikipedia.org/wiki/HTML5" title="HTML5">HTML5</a> for the page, and add the following code into
+<code>public/index.html</code>:</p>
+<div class="highlight"><pre>    <span class="cp">&lt;!DOCTYPE html&gt;</span>
+    <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;en-US&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;title&gt;</span>Start Page<span class="nt">&lt;/title&gt;</span>
+      <span class="nt">&lt;/head&gt;</span>
+      <span class="nt">&lt;body&gt;</span>
+        <span class="nt">&lt;p&gt;</span>Hello, Padrino!<span class="nt">&lt;/p&gt;</span>
+      <span class="nt">&lt;/body&gt;</span>
+    <span class="nt">&lt;/html&gt;</span>
+</pre></div>
+<p>Explanation of the parts:</p>
+
+<ul>
+<li><code>&lt;!DOCTYPE html&gt;</code> - The <em>document type</em> tells the browser which HTML version should be used for rendering the content
+correctly.</li>
+<li><code>&lt;head&gt;...&lt;/head&gt;</code> - Specifying meta information like title, description, and other things, this is also the place to
+where to add CSS and JavaScript files.</li>
+<li><code>&lt;body&gt;...&lt;/body&gt;</code> - In this section the main content of the page is displayed.</li>
+</ul>
+
+<p>Plain static content - this used to be the way websites were created in the beginning of the web. Today, apps provide
+dynamic layout. During this chapter, we will se how to add more and more dynamic parts to our app.</p>
+
+<p>We can take a look at our new page by executing the following command:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span><span class="nb">cd </span>job-vacancy
+    <span class="nv">$ </span>bundle <span class="nb">exec </span>padrino start
+</pre></div>
+<p>You should see a message telling you that Padrino has taken the stage, and you should be able to view our created index
+page by visiting <a href="http://localhost:3000/index.html" title="index.html">http://localhost:3000/index.html</a> in your
+browser.</p>
+
+<p>But hey, you might ask &quot;Why do we use the <code>bundle exec</code> command - isn&#39;t just <code>padrino start</code> enough?&quot; The reason for
+this is that we use bundler to load exactly those Ruby gems that we specified in the Gemfile. I recommend that you use
+<code>bundle exec</code> for all following commands, but to focus on Padrino, I will skip this command on the following parts of
+the book.</p>
+
+<p>You may have thought it a little odd that we had to manually requests the index.html in the URL when viewing our start
+page.  This is because our app currently has no idea about <strong>routing</strong>. Routing is the process to recognize requeste
+URLs and to forward these requests to actions of controllers. With other words: A router is like a like vending machine
+where you put in money to get a coke. In this case, the machine is the <em>router</em> which <em>routes</em> your input &quot;Want a coke&quot;
+to the action &quot;Drop a Coke in the tray&quot;.</p>
+
+<h3>First Controller And Routing</h3>
+
+<p>Lets add some basic routes for displaying our home, about, and contact-page. How can we do this? With the help of a
+routing controller. A controller makes data from you app (in our case job offers) available to the view (seeing the
+details of a job offer). Now let&#39;s create a controller in Padrino names page:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g controller page
+</pre></div>
+<p>The output of this command is:</p>
+<div class="highlight"><pre>    create  app/controllers/page.rb
+    create  app/helpers/page_helper.rb
+    create  app/views/page
+     apply  tests/rspec
+    create  spec/app/controllers/page_controller_spec.rb
+</pre></div>
+<p>(If you have questions about the output above, please drop me a line - I think it is so clear that it doesn&#39;t need any
+explanation about it.)</p>
+
+<p>Lets take a closer look at our page-controller:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controller/page.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:page</span> <span class="k">do</span>
+
+      <span class="c1"># get :index, :map =&gt; &#39;/foo/bar&#39; do</span>
+      <span class="c1">#   session[:foo] = &#39;bar&#39;</span>
+      <span class="c1">#   render &#39;index&#39;</span>
+      <span class="c1"># end</span>
+
+      <span class="c1"># get :sample, :map =&gt; &#39;/sample/url&#39;, :provides =&gt; [:any, :js] do</span>
+      <span class="c1">#   case content_type</span>
+      <span class="c1">#     when :js then ...</span>
+      <span class="c1">#     else ...</span>
+      <span class="c1"># end</span>
+
+      <span class="c1"># get :foo, :with =&gt; :id do</span>
+      <span class="c1">#   &#39;Maps to url &#39;/foo/#{params[:id]}&#39;&#39;</span>
+      <span class="c1"># end</span>
+
+      <span class="c1"># get &#39;/example&#39; do</span>
+      <span class="c1">#   &#39;Hello world!&#39;</span>
+      <span class="c1"># end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>The controller above defines for our <code>JobVacancy</code> the <code>:page</code> controller with no specified routes inside the
+app. Let&#39;s change this and define the <em>about</em>, <em>contact</em>, and <em>home</em> actions:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controller/page.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="o">.</span><span class="n">App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:page</span> <span class="k">do</span>
+      <span class="n">get</span> <span class="ss">:about</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s1">&#39;/about&#39;</span> <span class="k">do</span>
+        <span class="n">render</span> <span class="ss">:erb</span><span class="p">,</span> <span class="s1">&#39;page/about&#39;</span>
+      <span class="k">end</span>
+
+      <span class="n">get</span> <span class="ss">:contact</span> <span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s1">&#39;/contact&#39;</span> <span class="k">do</span>
+        <span class="n">render</span> <span class="ss">:erb</span><span class="p">,</span> <span class="s1">&#39;page/contact&#39;</span>
+      <span class="k">end</span>
+
+      <span class="n">get</span> <span class="ss">:home</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+        <span class="n">render</span> <span class="ss">:erb</span><span class="p">,</span> <span class="s1">&#39;page/home&#39;</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>We will go through each line:</p>
+
+<ul>
+<li><code>JobVacancy::App.controller :page</code> - Define the namespace <em>page</em> for our JobVacancy app. Typically, the controller name
+will also be part of the route.</li>
+<li><code>do ... end</code> - This expression defines a block in Ruby. Think of it as a method without a name, also called anonymous
+functions, which is passed to another function as an argument.</li>
+<li><code>get :about, :map =&gt; &#39;/about&#39;</code> - The HTTP command <em>get</em> starts the declaration of the route followed by the <em>about</em>
+action (in the form of a Ruby symbol[^symbol]), and is finally mapped to the explicit URL <em>/about</em>. When you start
+your server with <code>bundle exec padrino s</code> and visit the URL <code>http.//localhost:3000/about</code>, you can see the rendered
+output of this request.</li>
+<li><code>render :erb, &#39;page/about&#39;</code> - This action tells us that we want to render an the <em>erb</em> file <em>page/about</em>. This file is
+actually located at <code>app/views/page/about.erb</code> file. Normally the views are placed under
+<em>app/views/<controller-name>/<action-name>.<ending></em>  Instead of using an ERB templates, you could also use <code>:haml</code>,
+or another template language. If you are lazy, you can leave the   option for the rendering option completely out and
+leave the matching completely for Padrino.</li>
+</ul>
+
+<p>[^symbol]: Unlike strings, symbols of the same name are initialized and exist in memory only once during a session of
+ruby. This makes your programs more efficient.</p>
+
+<p>To see what routes you have defined for your app just call <code>padrino rake routes</code>:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino rake <span class="nv">routes</span>
+    <span class="o">=</span>&gt; Executing Rake routes ...
+</pre></div><div class="highlight"><pre>    Application: JobVacancy
+    URL                  REQUEST  PATH
+    <span class="o">(</span>:page, :about<span class="o">)</span>        GET    /about
+    <span class="o">(</span>:page, :contact<span class="o">)</span>      GET    /contact
+    <span class="o">(</span>:page, :home<span class="o">)</span>         GET    /
+</pre></div>
+<p>This command crawls through your app looking for delicious routes and gives you a nice overview about <strong>URL,
+REQUEST</strong>, and <strong>PATH</strong>.</p>
+
+<h3>App Template With ERB</h3>
+
+<p>Although we are now able to put content (albeit static) on our site, it would be nice to have some sort of basic styling
+on our web page. First we need to generate a basic template for all pages we want to create. Lets create
+<em>app/views/layouts/application.erb</em>:</p>
+<div class="highlight"><pre>    <span class="cp">&lt;!DOCTYPE html&gt;</span>
+    <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;en-US&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;title&gt;</span>Job Vacancy - find the best jobs<span class="nt">&lt;/title&gt;</span>
+      <span class="nt">&lt;/head&gt;</span>
+      <span class="nt">&lt;body&gt;</span>
+        <span class="err">&lt;</span>%= yield %&gt;
+      <span class="nt">&lt;/body&gt;</span>
+    <span class="nt">&lt;/html&gt;</span>
+</pre></div>
+<p>Let&#39;s see what is going on with the <code>&lt;%= yield %&gt;</code> line. At first you may ask what does the <code>&lt;&gt;</code> symbols mean. They are
+indicators that you want to execute Ruby code to fetch data that is put into the template. Here, the <code>yield</code> command will
+put the content of the called page, like <em>about.erb</em> or <em>contact.erb</em>,  into the template.</p>
+
+<h3>CSS design using Twitter bootstrap</h3>
+
+<p>The guys at Twitter were kind enough to make their CSS framework <strong>Twitter Bootstrap</strong> available for everyone to use. It
+is available from Github at <a href="https://github.com/twitter/bootstrap/" title="repository on Github">public repository on Github</a>.</p>
+
+<p>Padrino itself also provides built-in templates for common tasks done on web app. These
+<a href="https://github.com/padrino/padrino-recipes">padrino-recipes</a> help you saving time by not reinventing the wheel.
+Thanks to <a href="http://twitter.com/#!/arthur_chiu" title="@arthur_chiu">@arthur_chiu</a>, we use his
+<a href="https://github.com/padrino/padrino-recipes/blob/master/plugins/bootstrap_plugin.rb">bootstrap-plugin</a> by executing:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino-gen plugin bootstrap
+
+      apply  https://github.com/padrino/padrino-recipes/raw/master/plugins/bootstrap_plugin.rb
+      create    public/stylesheets/bootstrap.css
+      create    public/stylesheets/bootstrap-responsive.css
+      create    public/javascripts/bootstrap.js
+      create    public/javascripts/bootstrap.min.js
+      create    public/images/glyphicons-halflings.png
+      create    public/images/glyphicons-halflings-white.png
+</pre></div>
+<p>Next we need to include the style sheet in our app template for the whole app:</p>
+<div class="highlight"><pre>    &lt;!DOCTYPE html&gt;
+    &lt;html <span class="nv">lang</span><span class="o">=</span><span class="s2">&quot;en-US&quot;</span>&gt;
+      &lt;head&gt;
+        &lt;title&gt;Job Vacancy - find the best <span class="nb">jobs</span>&lt;/title&gt;
+        &lt;%<span class="o">=</span> stylesheet_link_tag <span class="s1">&#39;bootstrap&#39;</span>, <span class="s1">&#39;bootstrap-responsive&#39;</span> %&gt;
+        &lt;%<span class="o">=</span> javascript_include_tag <span class="s1">&#39;bootstrap.min&#39;</span>, <span class="s1">&#39;jquery&#39;</span>, <span class="s1">&#39;jquery-ujs&#39;</span> %&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        &lt;%<span class="o">=</span> yield %&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+</pre></div>
+<p>The <code>stylesheet_link_tag</code> points to the <em>bootstrap.min.css</em> in you app <em>public/stylesheets</em> directory and will
+automatically create a link to this stylesheet. The <code>javascript_include_tag</code> does the same as <code>stylesheet_link_tag</code> for
+your JavaScript files in the <em>public/javascript</em> directory.</p>
+
+<h3>Using Sprockets to Manage the Asset Pipeline</h3>
+
+<p><a href="https://github.com/sstephenson/sprockets">Sprockets</a> are a way to manage serving your assets like CSS, and JavaScript
+compiling all the different files in one summarized file for each type. They make it easy to take advantage to use a
+preprocessor to write your assests with <a href="http://sass-lang.com/">Sass</a>, <a href="http://coffeescript.org/">Coffesscript</a>, or
+<a href="http://lesscss.org/">LESS</a>.</p>
+
+<p>To implement Sprockets in Padrino there the following strategies:</p>
+
+<ul>
+<li><a href="https://github.com/livingsocial/rake-pipeline">rake-pipeline</a>: Define filters that transforms directory trees.</li>
+<li><a href="http://gruntjs.com/">grunt</a>: Set a task to compile and manage assets in JavaScript.</li>
+<li><a href="https://github.com/rstacruz/sinatra-assetpack">sinatra-assetpack</a>: Let&#39;s you define you assets transparently in
+Sinatra.</li>
+<li><a href="https://github.com/nightsailer/padrino-sprockets">padrino-sprockets</a>: Integrate sprockets with Padrino in the Rails
+way.</li>
+</ul>
+
+<p>We are using the <strong>padrino-sprockets</strong> gem. Let&#39;s add it to our Gemfile:</p>
+<div class="highlight"><pre>    <span class="c1"># Gemfile</span>
+    <span class="n">gem</span> <span class="s1">&#39;padrino-sprockets&#39;</span><span class="p">,</span> <span class="ss">:require</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s1">&#39;padrino/sprockets&#39;</span><span class="o">]</span><span class="p">,</span> <span class="ss">:git</span> <span class="o">=&gt;</span> <span class="s1">&#39;git://github.com/nightsailer/padrino-sprockets.git&#39;</span>
+</pre></div>
+<p>Next we need to move all our assets from the public folder in the assets folder:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span><span class="nb">cd</span> &lt;path-to-your-padrino-app&gt;
+    <span class="nv">$ </span>mkdir -p app/assets
+    <span class="nv">$ </span>mv app/public/javascript app/assets
+    <span class="nv">$ </span>mv app/public/stylesheets app/assets
+    <span class="nv">$ </span>mv app/public/images app/assets
+</pre></div>
+<p>Now we have to register Padrino-Sprockets in this application:</p>
+<div class="highlight"><pre>    <span class="c1"># app/app.rb</span>
+    <span class="k">module</span> <span class="nn">JobVacancy</span>
+      <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="ss">Padrino</span><span class="p">:</span><span class="ss">:Application</span>
+        <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+        <span class="n">register</span> <span class="ss">Padrino</span><span class="p">:</span><span class="ss">:Sprockets</span>
+        <span class="n">sprockets</span>
+        <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Next we need to determine the order of the loaded CSS files:</p>
+<div class="highlight"><pre>    <span class="c1"># app/assets/stylesheets/application.css</span>
+    <span class="sr">/*</span>
+<span class="sr">     * This is a manifest file that&#39;ll automatically include all the stylesheets available in this directory</span>
+<span class="sr">     * and any sub-directories. You&#39;re free to add application-wide styles to this file and they&#39;ll appear at</span>
+<span class="sr">     * the top of the compiled file, but it&#39;s generally better to create a new file per style scope.</span>
+<span class="sr">     * require_self: Puts the CSS contained within this file at the precise location (puts this command</span>
+<span class="sr">     * at the top of the generated css file</span>
+<span class="sr">     * require_tree . means, that requiring all stylesheets from the current directory.</span>
+<span class="sr">     *</span>
+<span class="sr">     *= require_self</span>
+<span class="sr">     *= require bootstrap</span>
+<span class="sr">     *= require bootstrap-responsive</span>
+<span class="sr">     *= require site</span>
+<span class="sr">    */</span>
+</pre></div>
+<p>First we are loading the <code>bootstrap</code> default css, then <code>bootstrap-response</code>, and finally our customized <code>site</code> CSS. The
+<code>require_self</code> loads the file itself, to define the order that the files are loaded. This is helpful if you want to
+check the order of the loaded CSS as a comment above your application without ever have to look into the source of it.</p>
+
+<p>Next let&#39;s have a look into our JavaScript stylesheets:</p>
+<div class="highlight"><pre>    <span class="err">#</span> <span class="nx">app</span><span class="o">/</span><span class="nx">assets</span><span class="o">/</span><span class="nx">javascript</span><span class="o">/</span><span class="nx">application</span><span class="p">.</span><span class="nx">js</span>
+
+    <span class="c1">// This is a manifest file that&#39;ll be compiled into including all the files listed below.</span>
+    <span class="c1">// Add new JavaScript/Coffee code in separate files in this directory and they&#39;ll automatically</span>
+    <span class="c1">// be included in the compiled file accessible from http://example.com/assets/application.js</span>
+    <span class="c1">// It&#39;s not advisable to add code directly here, but if you do, it&#39;ll appear at the bottom of the</span>
+    <span class="c1">// the compiled file.</span>
+    <span class="c1">//</span>
+    <span class="c1">//= require_tree .</span>
+</pre></div>
+<p>The interesting thing here is the <code>require_tree .</code> option. This options tells Sprockets to include all
+JavaScript files in the assets folder with no specific order.</p>
+
+<p>Now, we can clean up the include statements in our application template:</p>
+<div class="highlight"><pre><span class="x">    # app/views/application.erb</span>
+
+<span class="x">    &lt;!DOCTYPE html&gt;</span>
+<span class="x">    &lt;html lang=&quot;en-US&quot;&gt;</span>
+<span class="x">    &lt;head&gt;</span>
+<span class="x">      &lt;title&gt;Job Vacancy - find the best jobs&lt;/title&gt;</span>
+<span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">stylesheet_link_tag</span> <span class="s1">&#39;/assets/application&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">javascript_include_tag</span> <span class="s1">&#39;/assets/application&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">    &lt;/head&gt;</span>
+</pre></div>
+<p>Now we want to enable compression for our CSS and JavaScript files. For CSS compression Padrino Sprockets is using
+<a href="https://github.com/sstephenson/ruby-yui-compressor">YUI compressor</a> and for JS compression the
+<a href="https://github.com/lautis/uglifier">Uglifier</a>. We need to add these these Gems in our <code>Gemfiles</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># Gemfile</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="n">gem</span> <span class="s1">&#39;padrino-sprockets&#39;</span><span class="p">,</span> <span class="ss">:require</span> <span class="o">=&gt;</span> <span class="s1">&#39;padrino/sprockets&#39;</span><span class="p">,</span> <span class="ss">:git</span> <span class="o">=&gt;</span> <span class="s1">&#39;git://github.com/nightsailer/padrino-sprockets.git&#39;</span>
+    <span class="n">gem</span> <span class="s1">&#39;uglifier&#39;</span><span class="p">,</span> <span class="s1">&#39;2.1.1&#39;</span>
+    <span class="n">gem</span> <span class="s1">&#39;yui-compressor&#39;</span><span class="p">,</span> <span class="s1">&#39;0.9.6&#39;</span>
+</pre></div>
+<p>And finally we need to enable minifying in our production environment:</p>
+<div class="highlight"><pre>    <span class="c1"># app/app.rb</span>
+    <span class="k">module</span> <span class="nn">JobVacancy</span>
+      <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="ss">Padrino</span><span class="p">:</span><span class="ss">:Application</span>
+        <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+        <span class="n">register</span> <span class="ss">Padrino</span><span class="p">:</span><span class="ss">:Sprockets</span>
+        <span class="n">sprockets</span> <span class="ss">:minify</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Padrino</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="ss">:production</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<h3>Navigation</h3>
+
+<p>Next we want to create the top-navigation for our app. So we already implemented the <em>page</em> controller with the
+relevant actions. All we need is to put links to them in a navigation header for our basic layout.</p>
+<div class="highlight"><pre>    <span class="cp">&lt;!DOCTYPE html&gt;</span>
+    <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;en-US&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;title&gt;</span>Job Vacancy - find the best jobs<span class="nt">&lt;/title&gt;</span>
+        <span class="err">&lt;</span>%= stylesheet_link_tag &#39;bootstrap&#39;, &#39;bootstrap-responsive&#39; %&gt;
+        <span class="err">&lt;</span>%= javascript_include_tag &#39;bootstrap.min&#39;, &#39;jquery&#39;, &#39;jquery-ujs&#39; %&gt;
+        <span class="err">&lt;</span>%= stylesheet_link_tag &#39;/stylesheets/site.css&#39; %&gt;
+    <span class="nt">&lt;/head&gt;</span>
+    <span class="nt">&lt;body&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">=&quot;container&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span12 offset3&quot;</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">&quot;header&quot;</span><span class="nt">&gt;</span>Job Vacancy Board<span class="nt">&lt;/span&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;nav</span> <span class="na">id=</span><span class="s">&quot;navigation&quot;</span><span class="nt">&gt;</span>
+              <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span2 offset4&quot;</span><span class="nt">&gt;</span>
+                <span class="err">&lt;</span>%= link_to &#39;Home&#39;, url_for(:page, :home) %&gt;
+              <span class="nt">&lt;/div&gt;</span>
+              <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span2&quot;</span><span class="nt">&gt;</span>
+                <span class="err">&lt;</span>%= link_to &#39;About&#39;, url_for(:page, :about) %&gt;
+              <span class="nt">&lt;/div&gt;</span>
+              <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span2&quot;</span><span class="nt">&gt;</span>
+                <span class="err">&lt;</span>%= link_to &#39;Contact&#39;, url_for(:page, :contact) %&gt;
+              <span class="nt">&lt;/div&gt;</span>
+            <span class="nt">&lt;/nav&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span9 offset3 site&quot;</span><span class="nt">&gt;</span>
+              <span class="err">&lt;</span>%= yield %&gt;
+            <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/body&gt;</span>
+</pre></div>
+<p>Explanation of the new parts:</p>
+
+<ul>
+<li><code>link_to</code> - Is a helper for creating links. The first argument is the name for the link and the second is for the URL
+(href) to which the link points to.</li>
+<li><code>url_for</code> - This helper return the link which can be used as the second parameter for the <code>link_to</code> function. It
+specifies the <code>&lt;:controller&gt;, &lt;:action&gt;</code> which will be executed. You can use in your helper in your whole app to
+create clean and encapsulated URLs.</li>
+</ul>
+
+<p>Now that the we provide links to other parts of the app, lets add some sugar-candy styling:</p>
+<div class="highlight"><pre>    <span class="err">#</span> <span class="nt">app</span><span class="o">/</span><span class="nt">assets</span><span class="o">/</span><span class="nt">stylesheets</span><span class="o">/</span><span class="nt">site</span><span class="nc">.css</span>
+
+    <span class="nt">body</span> <span class="p">{</span>
+      <span class="k">font</span><span class="o">:</span> <span class="m">18.5px</span> <span class="n">Palatino</span><span class="o">,</span> <span class="s1">&#39;Palatino Linotype&#39;</span><span class="o">,</span> <span class="n">Helvetica</span><span class="o">,</span> <span class="n">Arial</span><span class="o">,</span> <span class="n">Verdana</span><span class="o">,</span> <span class="k">sans-serif</span><span class="p">;</span>
+      <span class="k">text-align</span><span class="o">:</span> <span class="k">justify</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nf">#header</span> <span class="p">{</span>
+      <span class="k">font-family</span><span class="o">:</span> <span class="n">Lato</span><span class="p">;</span>
+      <span class="k">font-size</span><span class="o">:</span> <span class="m">40px</span><span class="p">;</span>
+      <span class="k">font-weight</span><span class="o">:</span> <span class="k">bold</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nf">#navigation</span> <span class="p">{</span>
+      <span class="k">padding-top</span><span class="o">:</span> <span class="m">20px</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nt">h1</span> <span class="p">{</span>
+      <span class="k">font-family</span><span class="o">:</span> <span class="n">Lato</span><span class="p">;</span>
+      <span class="k">font-size</span><span class="o">:</span> <span class="m">30px</span><span class="p">;</span>
+      <span class="k">margin-bottom</span><span class="o">:</span> <span class="m">20px</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nc">.site</span> <span class="p">{</span>
+      <span class="k">padding</span><span class="o">:</span> <span class="m">20px</span><span class="p">;</span>
+      <span class="k">line-height</span><span class="o">:</span> <span class="m">1.8em</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
+<p>I will not explain anything at this point about CSS. If you still don&#39;t know how to use it, please go through <a href="http://www.w3schools.com/css/default.asp" title="w3c CSS">w3c
+school css</a> tutorial. Since we are using the asset pipeline, we
+don&#39;t need to register our new CSS file in <code>views/application.erb</code> - now you will understand why we did this.</p>
+
+<h3>Writing Tests</h3>
+
+<p>Our site does not list static entries of job offers that you write, but other users will be allowed to post job offers
+from the internet to our site. We need to add this behavior to our site. To be on the sure side, we will implement this
+behavior by writing tests first, then the code. We use the <a href="http://rspec.info/" title="RSpec">RSpec</a> testing framework for
+this.</p>
+
+<p>Remember when we created the <em>page-controller</em> with <code>padrino g controller page</code>? Thereby, Padrino created a
+corresponding spec file <em>spec/app/controller/page<em>controller</em>spec.rb</em> which has the following content:</p>
+<div class="highlight"><pre>    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;PageController&quot;</span> <span class="k">do</span>
+      <span class="n">before</span> <span class="k">do</span>
+        <span class="n">get</span> <span class="s2">&quot;/&quot;</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s2">&quot;returns hello world&quot;</span> <span class="k">do</span>
+        <span class="n">last_response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="s2">&quot;Hello World&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Let&#39;s update that file and write some basic tests to make sure that everything is working as expected. Replace the specs
+in the file with the following code:</p>
+<div class="highlight"><pre>    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;PageController&quot;</span> <span class="k">do</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;GET #about&quot;</span> <span class="k">do</span>
+
+        <span class="n">it</span> <span class="s2">&quot;renders the :about view&quot;</span> <span class="k">do</span>
+          <span class="n">get</span> <span class="s1">&#39;/about&#39;</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;GET #contact&quot;</span> <span class="k">do</span>
+
+        <span class="n">it</span> <span class="s2">&quot;renders the :contact view&quot;</span> <span class="k">do</span>
+          <span class="n">get</span> <span class="s1">&#39;/contact&#39;</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;GET #home&quot;</span> <span class="k">do</span>
+        <span class="n">it</span> <span class="s2">&quot;renders :home view&quot;</span> <span class="k">do</span>
+          <span class="n">get</span> <span class="s1">&#39;/&#39;</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>Let&#39;s explain the interesting parts:</p>
+
+<ul>
+<li><code>spec_helper</code> - Is a file to load commonly used functions to setup the tests.</li>
+<li><code>describe block</code> - This block describes the context for our tests. Think of it as way to group related tests.</li>
+<li><code>get ...</code> - This command executes a HTTP GET to the provided address.</li>
+<li><code>last_response</code> - The response object returns the header and body of the HTTP request.</li>
+</ul>
+
+<p>Now let&#39;s run the tests with <code>rspec spec/app/page_controller_spec.rb</code> and see what&#39;s going on:</p>
+<div class="highlight"><pre>    ...
+
+    Finished in 0.21769 seconds
+    3 examples, 0 failures
+</pre></div>
+<p>Cool, all tests passed! We didn&#39;t exactly use behavior-driven development until now, but will do so in the next parts.</p>
+
+<p><strong>Red-Green Cycle</strong></p>
+
+<p>In behavior-driven development (BDD) it is important to write a failing test first and then the code that satisfies the
+test. The red-green cycle represents the colors that you will see when executing these test: Red first, and then
+beautiful green. But once your code passes the tests, take yet a little more time to refactor your code. This little
+mind shift helps you a lot to think more about the problem and how to solve it. The test suite is a nice by product too.</p>
+
+
+      <div class="prevnext">
+          <a class="prev" href="/output/02-00-job-vacancy-application.html">&laquo; Prev</a>
+          <a class="next" href="/output/02-02-creation-of-models.html">Next &raquo;</a>
+      </div>
+
+    </div>
+    <script>
+      $(function() {
+        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
+        prettyPrint();
+      });
+    </script>
+  </body>
+
+</html>
+

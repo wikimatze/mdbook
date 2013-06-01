@@ -13,13 +13,87 @@
 
     <link rel="stylesheet" href="/css/layout.css" type="text/css" />
     <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
-    <style text="text/css"></style>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+
+    <style text="text/css">
+      /*
+       * jquery.tocify.css 1.4.0
+       * Author: @gregfranko
+       */
+
+      /* The Table of Contents container element */
+      #toc {
+          width: 20%;
+          max-height: 90%;
+          overflow: auto;
+          margin-left: -22%;
+          position: fixed;
+          border: 1px solid #ccc;
+          webkit-border-radius: 6px;
+          moz-border-radius: 6px;
+          border-radius: 6px;
+      }
+
+      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
+      #toc ul, #toc li {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          line-height: 30px;
+      }
+
+      /* Top level header elements */
+      .header {
+          text-indent: 10px;
+      }
+
+      /* Top level subheader elements.  These are the first nested items underneath a header element. */
+      .sub-header {
+          text-indent: 20px;
+          display: none;
+      }
+
+      /* Makes the font smaller for all subheader elements. */
+      .sub-header li {
+          font-size: 12px;
+      }
+
+      /* Further indents second level subheader elements. */
+      .sub-header .sub-header {
+          text-indent: 30px;
+      }
+
+      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
+      .sub-header .sub-header .sub-header {
+          text-indent: 40px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a, .nav-list .nav-header {
+          margin: 0px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a {
+          padding: 5px;
+      }
+
+    </style>
   </head>
 
   <body>
+  <div id="toc"></div>
     <div id="content">
-      
-<a name="1-Motivation" class="anchor" href="#1-Motivation"><span class="anchor-icon">aa</span></a><h1 id="1-Motivation">Motivation</h1>
+
+      <div class="prevnext">
+          <a class="prev" href="/output/01-00-introduction.html">&laquo; Prev</a>
+          <a class="next" href="/output/01-02-basics-and-tools.html">Next &raquo;</a>
+      </div>
+
+      <h1>Motivation</h1>
 
 <p>Shamelessly I have to tell you that I&#39;m learning Padrino through writing a book about instead of doing a blog post
 series about it. Besides I want to provide to provide you an up-to-date documentation for Padrino which is at the moment
@@ -29,7 +103,7 @@ scattered around the Padrino&#39;s web page <a href="http://www.padrinorb.com/">
 more modular and allows you to interchange various components with considerable ease. You will see this when you will
 the creation of two different application we are going to build throughout the book.</p>
 
-<a name="2-Why-Padrino-With-The-Developer-Point-of-View" class="anchor" href="#2-Why-Padrino-With-The-Developer-Point-of-View"><span class="anchor-icon">aa</span></a><h2 id="2-Why-Padrino-With-The-Developer-Point-of-View">Why Padrino With The Developer Point of View</h2>
+<h2>Why Padrino With The Developer Point of View</h2>
 
 <p>Nothing is enabled without explicit choice. You as a programmer knows what database is best for your application, which
 Gems don&#39;t provides security issues. If you are honest to yourself you can only learn a framework by heart if you go
@@ -38,7 +112,7 @@ There is no need for monkey-patching, almost everything can be changed via an AP
 of techniques that are common to Ruby can be reused.  Having a low stack frame makes it easier for your debugging.  The
 best Rails convenience parts like <code>I18n</code> and <code>active_support</code> are available for you.</p>
 
-<a name="2-Why-Padrino-In-A-Human-Way-" class="anchor" href="#2-Why-Padrino-In-A-Human-Way-"><span class="anchor-icon">aa</span></a><h2 id="2-Why-Padrino-In-A-Human-Way-">Why Padrino In A Human Way?</h2>
+<h2>Why Padrino In A Human Way?</h2>
 
 <p>Before going any further you may ask: Why should you care about learning and using another web framework? Because you
 want something that is <em>easy to use</em>, <em>simple to hack</em>, and <em>open to any contribution</em>. If you&#39;ve done
@@ -67,9 +141,19 @@ without duplicating code.</p>
 
 <p><a href="https://speakerdeck.com/daddye/padrino-framework-0-dot-11-and-1-dot-0">Remember</a>: &quot;<strong>Be tiny. Be fast. Be a Padrino</strong>&quot;</p>
 
-<p>%%/* vim: set ts=2 sw=2 textwidth=120: */</p>
+
+      <div class="prevnext">
+          <a class="prev" href="/output/01-00-introduction.html">&laquo; Prev</a>
+          <a class="next" href="/output/01-02-basics-and-tools.html">Next &raquo;</a>
+      </div>
 
     </div>
+    <script>
+      $(function() {
+        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
+        prettyPrint();
+      });
+    </script>
   </body>
 
 </html>

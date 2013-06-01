@@ -13,13 +13,87 @@
 
     <link rel="stylesheet" href="/css/layout.css" type="text/css" />
     <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
-    <style text="text/css"></style>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+
+    <style text="text/css">
+      /*
+       * jquery.tocify.css 1.4.0
+       * Author: @gregfranko
+       */
+
+      /* The Table of Contents container element */
+      #toc {
+          width: 20%;
+          max-height: 90%;
+          overflow: auto;
+          margin-left: -22%;
+          position: fixed;
+          border: 1px solid #ccc;
+          webkit-border-radius: 6px;
+          moz-border-radius: 6px;
+          border-radius: 6px;
+      }
+
+      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
+      #toc ul, #toc li {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          line-height: 30px;
+      }
+
+      /* Top level header elements */
+      .header {
+          text-indent: 10px;
+      }
+
+      /* Top level subheader elements.  These are the first nested items underneath a header element. */
+      .sub-header {
+          text-indent: 20px;
+          display: none;
+      }
+
+      /* Makes the font smaller for all subheader elements. */
+      .sub-header li {
+          font-size: 12px;
+      }
+
+      /* Further indents second level subheader elements. */
+      .sub-header .sub-header {
+          text-indent: 30px;
+      }
+
+      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
+      .sub-header .sub-header .sub-header {
+          text-indent: 40px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a, .nav-list .nav-header {
+          margin: 0px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a {
+          padding: 5px;
+      }
+
+    </style>
   </head>
 
   <body>
+  <div id="toc"></div>
     <div id="content">
-      
-<a name="2-Basics-And-Tools" class="anchor" href="#2-Basics-And-Tools"><span class="anchor-icon">aa</span></a><h2 id="2-Basics-And-Tools">Basics And Tools</h2>
+
+      <div class="prevnext">
+          <a class="prev" href="/output/01-01-motivation.html">&laquo; Prev</a>
+          <a class="next" href="/output/01-03-installing-ruby-with-rbenv.html">Next &raquo;</a>
+      </div>
+
+      <h2>Basics And Tools</h2>
 
 <p>I won&#39;t tell you which operating system you should use - there is an interesting discussion on
 <a href="http://news.ycombinator.com/item?id=3786674" title="hackernews">hackernews</a>. I leave it free for the reader of this book
@@ -51,7 +125,7 @@ a plain text editor.</p>
 <p>All tools have their strengths and weaknesses. Try to find the software that works best for you. The main goal is that
 you are comfortable with it because you will spend a lot of time with it.</p>
 
-<a name="3-Ruby-Knowledge" class="anchor" href="#3-Ruby-Knowledge"><span class="anchor-icon">aa</span></a><h3 id="3-Ruby-Knowledge">Ruby Knowledge</h3>
+<h3>Ruby Knowledge</h3>
 
 <p>For any non-Ruby people, I strongly advise you to check out one of these books and learn the basics of Ruby before
 continuing here.</p>
@@ -67,9 +141,19 @@ a entertaining and educational way.</li>
 <p>In this book, I assume readers having Ruby knowledge and will not be explaining every last detail. I will, however,
 explain Padrino-specific coding techniques.</p>
 
-<p>%%/* vim: set ts=2 sw=2 textwidth=120: */</p>
+
+      <div class="prevnext">
+          <a class="prev" href="/output/01-01-motivation.html">&laquo; Prev</a>
+          <a class="next" href="/output/01-03-installing-ruby-with-rbenv.html">Next &raquo;</a>
+      </div>
 
     </div>
+    <script>
+      $(function() {
+        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
+        prettyPrint();
+      });
+    </script>
   </body>
 
 </html>

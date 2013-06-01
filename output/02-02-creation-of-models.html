@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset=utf-8" />
+    <title>Muss noch gemacht werden und dynamisch gesetzt sein </title>
+    <meta name="author" content="Matthias Guenther" />
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
+    <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+
+    <style text="text/css">
+      /*
+       * jquery.tocify.css 1.4.0
+       * Author: @gregfranko
+       */
+
+      /* The Table of Contents container element */
+      #toc {
+          width: 20%;
+          max-height: 90%;
+          overflow: auto;
+          margin-left: -22%;
+          position: fixed;
+          border: 1px solid #ccc;
+          webkit-border-radius: 6px;
+          moz-border-radius: 6px;
+          border-radius: 6px;
+      }
+
+      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
+      #toc ul, #toc li {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          line-height: 30px;
+      }
+
+      /* Top level header elements */
+      .header {
+          text-indent: 10px;
+      }
+
+      /* Top level subheader elements.  These are the first nested items underneath a header element. */
+      .sub-header {
+          text-indent: 20px;
+          display: none;
+      }
+
+      /* Makes the font smaller for all subheader elements. */
+      .sub-header li {
+          font-size: 12px;
+      }
+
+      /* Further indents second level subheader elements. */
+      .sub-header .sub-header {
+          text-indent: 30px;
+      }
+
+      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
+      .sub-header .sub-header .sub-header {
+          text-indent: 40px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a, .nav-list .nav-header {
+          margin: 0px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a {
+          padding: 5px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+  <div id="toc"></div>
+    <div id="content">
+
+      <div class="prevnext">
+          <a class="prev" href="/output/02-01-creating-a-new-application.html">&laquo; Prev</a>
+          <a class="next" href="/output/02-03-user-login-and-registration.html">Next &raquo;</a>
+      </div>
+
+      <h2>Creation Of The Models</h2>
+
+<h3>User Model</h3>
+
+<p>There are many different ways how to develop a user entity for your system. A user in our system will have an <em>unique</em>
+identification number <strong>id</strong>, a <strong>name</strong>, and an <strong>email</strong>. You can use commands on the command-line to create models
+too:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g model user name:string email:string -a app
+
+       apply  orms/activerecord
+       apply  tests/rspec
+      create  app/models/user.rb
+      create  app/spec/models/user_spec.rb
+      create  db/migrate/001_create_users.rb
+</pre></div>
+<p>Wow, it created a quite a bunch of files for us. Let&#39;s examine each of them:</p>
+
+<p><strong>user.rb</strong></p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+    <span class="k">end</span>
+</pre></div>
+<p>All we have is an empty class which inherits from
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html">ActiveRecord::Base</a>. <code>ActvieRecord</code> provides a simple
+object-relational-mapper from our models to corresponding database tables. You can also define relations between
+models through associations.</p>
+<div class="highlight"><pre>    <span class="c1"># app/spec/models/user_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;User Model&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+      <span class="n">it</span> <span class="s1">&#39;can be created&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">should_not</span> <span class="n">be_nil</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>As you can see, the generator created already a test for us, which basically checks if the model can be created. What
+would happen if you run the tests for this model? Let the code speak of it&#39;s own and run the tests, that&#39;s what they are
+made for after all:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec/app/models
+
+    User Model
+      can be created <span class="o">(</span>FAILED - 1<span class="o">)</span>
+
+    Failures:
+
+      1<span class="o">)</span> User Model can be created
+         Failure/Error: <span class="nb">let</span><span class="o">(</span>:user<span class="o">)</span> <span class="o">{</span> User.new <span class="o">}</span>
+         ActiveRecord::StatementInvalid:
+           Could not find table <span class="s1">&#39;users&#39;</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:4:in `new&#39;</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:4:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:6:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
+
+    Finished in 0.041 seconds
+    1 example, 1 failure
+
+    Failed examples:
+</pre></div>
+<p>Executing the test resulted in an error. However, it very explicitly told us the reason: The <em>user</em> table does not exist
+yet. And how do we create one? Here, migrations enter the stage.</p>
+
+<p>Migrations helps you to change the database in an ordered manner. Let&#39;s have a look at our first migration:</p>
+<div class="highlight"><pre>    <span class="n">db</span><span class="o">/</span><span class="n">migrate</span><span class="o">/</span><span class="mo">001</span><span class="n">_create_users</span><span class="o">.</span><span class="n">rb</span>
+
+    <span class="k">class</span> <span class="nc">CreateUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
+        <span class="n">create_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:name</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:email</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">down</span>
+        <span class="n">drop_table</span> <span class="ss">:users</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>This code will create a <code>users</code> table with the <code>name</code> and <code>email</code> attributes. The <code>id</code> attribute will be created
+automatically unless you specify to use a different attribute as the unique key to a database entry. By the way, the
+convention to name tables of models in the plural form comes from <a href="http://rubyonrails.org/">Ruby On Rails</a>. Now we need
+to run this migration:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino rake ar:migrate
+
+    <span class="o">=</span>&gt; Executing Rake ar:migrate ...
+      DEBUG -  <span class="o">(</span>0.1ms<span class="o">)</span>  <span class="k">select </span>sqlite_version<span class="o">(</span>*<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>143.0ms<span class="o">)</span>  CREATE TABLE <span class="s2">&quot;schema_migrations&quot;</span> <span class="o">(</span><span class="s2">&quot;version&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span> NOT NULL<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>125.2ms<span class="o">)</span>  CREATE UNIQUE INDEX <span class="s2">&quot;unique_schema_migrations&quot;</span> ON <span class="s2">&quot;schema_migrations&quot;</span> <span class="o">(</span><span class="s2">&quot;version&quot;</span><span class="o">)</span>
+      DEBUG -  <span class="o">(</span>0.2ms<span class="o">)</span>  SELECT <span class="s2">&quot;schema_migrations&quot;</span>.<span class="s2">&quot;version&quot;</span> FROM <span class="s2">&quot;schema_migrations&quot;</span>
+       INFO - Migrating to CreateUsers <span class="o">(</span>1<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>0.1ms<span class="o">)</span>  begin transaction
+      ...
+</pre></div>
+<p>Since we are working in the development environment, Padrino automatically created the development database for us:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>ls db/
+      job_vacancy_development.db  job_vacancy_test.db  migrate  schema.rb
+</pre></div>
+<p>Now let&#39;s start <a href="http://www.sqlite.org/">sqlite3</a>, connect to the database, and see if the users table was created
+properly:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>sqlite3 db/job_vacancy_development.db
+
+    SQLite version 3.7.13 2012-06-11 02:05:22
+    Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for </span>instructions
+    Enter SQL statements terminated with a <span class="s2">&quot;;&quot;</span>
+    sqlite&gt; .tables
+    schema_migrations  users
+    sqlite&gt; .schema users
+    CREATE TABLE <span class="s2">&quot;users&quot;</span> <span class="o">(</span><span class="s2">&quot;id&quot;</span> INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, <span class="s2">&quot;name&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span>, <span class="s2">&quot;email&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span>, <span class="s2">&quot;created_at&quot;</span> datetime NOT NULL, <span class="s2">&quot;updated_at&quot;</span> datetime NOT NULL<span class="o">)</span>;
+    sqlite&gt; .exit
+</pre></div>
+<p>Let&#39;s have a look on the <code>config/database.rb</code> file to understand more about the different databases:</p>
+<div class="highlight"><pre>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:development</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="ss">:adapter</span> <span class="o">=&gt;</span> <span class="s1">&#39;sqlite3&#39;</span><span class="p">,</span>
+      <span class="ss">:database</span> <span class="o">=&gt;</span> <span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;job_vacancy_development.db&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:production</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="ss">:adapter</span> <span class="o">=&gt;</span> <span class="s1">&#39;sqlite3&#39;</span><span class="p">,</span>
+      <span class="ss">:database</span> <span class="o">=&gt;</span> <span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;job_vacancy_production.db&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:test</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="ss">:adapter</span> <span class="o">=&gt;</span> <span class="s1">&#39;sqlite3&#39;</span><span class="p">,</span>
+      <span class="ss">:database</span> <span class="o">=&gt;</span> <span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;job_vacancy_test.db&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+</pre></div>
+<p>As you can see, each of the different environments  <em>development</em>, <em>production</em>, and <em>test</em> have their own database.
+Lets&#39;s be sure that all databases are created:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino rake ar:create:all
+
+    bundle <span class="nb">exec </span>padrino rake ar:create:all
+    <span class="o">=</span>&gt; Executing Rake ar:create:all ...
+    /home/elex/Dropbox/git-repositorie/job-vacancy/db/job_vacancy_development.db already exists
+    /home/helex/Dropbox/git-repositorie/job-vacancy/db/job_vacancy_development.db already exists
+    /home/helex/Dropbox/git-repositories/job-vacancy/db/job_vacancy_production.db already exists
+    /home/helex/Dropbox/git-repositories/job-vacancy/db/job_vacancy_test.db already exists
+    /home/helex/Dropbox/git-repositories/job-vacancy/db/job_vacancy_test.db already exists
+</pre></div>
+<p>Alright, now we are ready to re-execute the tests again.</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec/app/models
+
+    User Model
+      can be created <span class="o">(</span>FAILED - 1<span class="o">)</span>
+
+    Failures:
+
+      1<span class="o">)</span> User Model can be created
+         Failure/Error: <span class="nb">let</span><span class="o">(</span>:user<span class="o">)</span> <span class="o">{</span> User.new <span class="o">}</span>
+         ActiveRecord::StatementInvalid:
+           Could not find table <span class="s1">&#39;users&#39;</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:4:in `new&#39;</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:4:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:6:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
+
+    Finished in 0.04847 seconds
+    1 example, 1 failure
+
+    Failed examples:
+
+    rspec ./spec/app/models/user_spec.rb:5 <span class="c"># User Model can be created</span>
+</pre></div>
+<p>But why are the tests still failing? Because the migration for the <em>user</em> table was not executed for the test
+environment. Let&#39;s fix this with the following command:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino rake ar:migrate -e <span class="nb">test</span>
+    <span class="o">=</span>&gt; Executing Rake ar:migrate ...
+    <span class="o">==</span>  CreateUsers: <span class="nv">migrating</span> <span class="o">====================================================</span>
+    -- create_table<span class="o">(</span>:users<span class="o">)</span>
+       -&gt; 0.0030s
+    <span class="o">==</span>  CreateUsers: migrated <span class="o">(</span>0.0032s<span class="o">)</span> <span class="o">===========================================</span>
+</pre></div>
+<p>Finally the test passes:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec/app/models
+
+    User Model
+      can be created
+
+    Finished in 0.05492 seconds
+    1 example, 0 failures
+</pre></div>
+<p>How can we run all the tests in our application and see if everything is working? Just execute <code>padrino rake spec</code>
+to run all tests in the <code>spec/</code> folder:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino rake <span class="nv">spec</span>
+    <span class="o">=</span>&gt; Executing Rake spec ...
+    /home/helex/.rbenv/versions/1.9.3-p392/bin/ruby -S rspec ./spec/app/models/user_spec.rb -fs --color
+
+    User Model
+      can be created
+
+    Finished in 0.05589 seconds
+    1 example, 0 failures
+    /home/helex/.rbenv/versions/1.9.3-p392/bin/ruby -S rspec ./spec/app/controllers/page_controller_spec.rb -fs --color
+
+    PageController
+      GET <span class="c">#about</span>
+        renders the :about view
+      GET <span class="c">#contact</span>
+        renders the :contact view
+      GET <span class="c">#home</span>
+        renders the :home view
+
+    Finished in 0.20325 seconds
+    3 examples, 0 failures
+</pre></div>
+<p>This is very handy to make sure that you didn&#39;t broke anything in the existing codebase when you are working on a next
+feature. Run these regression tests frequently and enjoy it to see your app growing feature by feature.</p>
+
+<h3>Job Offer Model</h3>
+
+<p>Since we now know how to create the basic model of our users, it&#39;s time to create a model for presenting a job offer.
+A job offer consists of the following attributes:</p>
+
+<ul>
+<li>title: The name of the job position.</li>
+<li>location: The geographical location of the job.</li>
+<li>description: Details about the position.</li>
+<li>contact: An email address of the contact person.</li>
+<li>time-start: The earliest entry date for this position.</li>
+<li>time-end: A job offer isn&#39;t valid forever.</li>
+</ul>
+
+<p>Let&#39;s run the Padrino command to create the model for us:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g model job_offer title:string location:string description:text contact:string time_start:date time_end:date -a app
+       apply  orms/activerecord
+       apply  tests/rspec
+       create  app/models/job_offer.rb
+       create  app/spec/models/job_offer_spec.rb
+       create  db/migrate/002_create_job_offers.rb
+</pre></div>
+<p>Next, we need to run our new database migration so that our database has the right scheme:</p>
+<div class="highlight"><pre>    bundle <span class="nb">exec </span>padrino rake ar:migrate
+    <span class="o">=</span>&gt; Executing Rake ar:migrate ...
+      DEBUG -  <span class="o">(</span>0.4ms<span class="o">)</span>  SELECT <span class="s2">&quot;schema_migrations&quot;</span>.<span class="s2">&quot;version&quot;</span> FROM <span class="s2">&quot;schema_migrations&quot;</span>
+       INFO - Migrating to CreateUsers <span class="o">(</span>1<span class="o">)</span>
+       INFO - Migrating to CreateJobOffers <span class="o">(</span>2<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>0.3ms<span class="o">)</span>  <span class="k">select </span>sqlite_version<span class="o">(</span>*<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>0.2ms<span class="o">)</span>  begin <span class="nv">transaction</span>
+    <span class="o">==</span>  CreateJobOffers: <span class="nv">migrating</span> <span class="o">================================================</span>
+    -- create_table<span class="o">(</span>:job_offers<span class="o">)</span>
+    ...
+</pre></div>
+<p>In order to run our tests, we also need to run our migrations for the test environment:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino rake ar:migrate -e <span class="nb">test</span>
+    <span class="o">=</span>&gt; Executing Rake ar:migrate ...
+    <span class="o">==</span>  CreateJobOffers: <span class="nv">migrating</span> <span class="o">================================================</span>
+    -- create_table<span class="o">(</span>:job_offers<span class="o">)</span>
+       -&gt; 0.0302s
+    <span class="o">==</span>  CreateJobOffers: migrated <span class="o">(</span>0.0316s<span class="o">)</span> <span class="o">=======================================</span>
+</pre></div>
+<p>TBD: Find a way to run ar:migrate for all environments (mainly production and test)</p>
+
+<p>If you run your tests with <code>padrino rake spec</code>, everything should be fine.</p>
+
+<h3>Creating Connection Between User And Job Offer Model</h3>
+
+<p>Since we now have created our two main models, it&#39;s time to define associations between them. Associations make common
+operations like deleting or updating data in our relational database easier. Just imagine that we have a user
+in our app that added many job offers in our system. Now this customer decides that he wants to cancel
+his account. We decide that all his job offers should also disappear in the system. One solution would be to delete
+the user, remember his id, and delete all job offers entries that originate from this id. This manual effort
+disappears when associations are used: It becomes as easy as &quot;If I delete this user from the system, delete
+automatically all corresponding jobs for this user&quot;.</p>
+
+<p>We will quickly browse through the associations.</p>
+
+<p><strong>has_many</strong></p>
+
+<p>This association is the most commonly used one. It does exactly as it tells us: One object has many other objects.
+We define the association between the user and the job offers as shown in the following expression:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="n">has_many</span> <span class="ss">:job_offers</span>
+    <span class="k">end</span>
+</pre></div>
+<p><strong>belongs_to</strong></p>
+
+<p>The receiving object of the <em>has_many</em> relationship defines that it belongs to exactly one object, and therefore:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/job_offer.rb</span>
+
+    <span class="k">class</span> <span class="nc">JobOffer</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="n">belongs_to</span> <span class="ss">:user</span>
+    <span class="k">end</span>
+</pre></div>
+<p><strong>Migrate after associate</strong></p>
+
+<p>Whenever you modify your models, remember that you need to run migrations too. Because we added the associations
+manually, we also need to write the migrations. Luckily, Padrino helps us with this task a bit. We know that the
+job offer is linked to a user via the user&#39;s id. This foreign key relationship results in adding an extra
+column <code>user_id</code> to the <code>job_offers table</code>. For this change, we can use the following command to create a migration:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g migration AddUserIdToJobOffers user_id:integer
+    apply  orms/activerecord
+    create  db/migrate/003_add_user_id_to_job_offers.rb
+</pre></div>
+<p>Let&#39;s take a look at the created migration:</p>
+<div class="highlight"><pre>    <span class="k">class</span> <span class="nc">AddUserIdToJobOffers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
+        <span class="n">change_table</span> <span class="ss">:joboffers</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">integer</span> <span class="ss">:user_id</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">down</span>
+        <span class="n">change_table</span> <span class="ss">:joboffers</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">remove</span> <span class="ss">:user_id</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Can you see the small bug? This migration won&#39;t work, you have to change <code>joboffers</code> to <code>job_offers</code>. For the time
+being, generators can help you to write code, but not prevent you from thinking.</p>
+
+<p>Finally let&#39;s run our migrations:</p>
+<div class="highlight"><pre>   <span class="nv">$ </span>padrino rake ar:migrate
+   <span class="nv">$ </span>padrino rake ar:migrate -e <span class="nb">test</span>
+</pre></div>
+<h4>Testing our associations in the console</h4>
+
+<p>To see whether the migrations were executed, we connected to the sqlite3 database via the command line. Let&#39;s use a
+different approach and use the Padrino console this time.  All you have to do is to run the following command:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino <span class="nv">c</span>
+    <span class="o">=</span>&gt; Loading development console <span class="o">(</span>Padrino v.0.11.1<span class="o">)</span>
+    <span class="o">=</span>&gt; Loading Application JobVacancy
+    &gt;&gt;
+</pre></div>
+<p>Now you are in an environment which acts like <a href="http://en.wikipedia.org/wiki/Interactive_Ruby_Shell">IRB</a>, the
+<em>Interactive Ruby</em> shell. This allows you to execute Ruby commands and immediately see it&#39;s response.</p>
+
+<p>Let&#39;s run the shell to create a user with job offers:</p>
+<div class="highlight"><pre>    <span class="nv">user</span> <span class="o">=</span> User.new<span class="o">(</span>:name <span class="o">=</span>&gt; <span class="s1">&#39;Matthias Günther&#39;</span>, :email <span class="o">=</span>&gt; <span class="s1">&#39;matthias.guenther&#39;</span><span class="o">)</span>
+    <span class="o">=</span>&gt; <span class="c">#&lt;User id: nil, name: &quot;Matthias Günther&quot;, email: &quot;matthias.guenther&quot;, created_at: nil, updated_at: nil&gt;</span>
+    &gt;&gt; user.name
+    <span class="o">=</span>&gt; <span class="s2">&quot;Matthias Günther&quot;</span>
+</pre></div>
+<p>This creates a user object in our session. If we want to add an entry permanently into the database, you have to use
+<em>create</em> method:</p>
+<div class="highlight"><pre>    User.create<span class="o">(</span>:name <span class="o">=</span>&gt; <span class="s1">&#39;Matthias Günther&#39;</span>, :email <span class="o">=</span>&gt; <span class="s1">&#39;matthias.guenther&#39;</span><span class="o">)</span>
+    DEBUG -  <span class="o">(</span>0.2ms<span class="o">)</span>  begin transaction
+      DEBUG - SQL <span class="o">(</span>114.6ms<span class="o">)</span>  INSERT INTO <span class="s2">&quot;users&quot;</span> <span class="o">(</span><span class="s2">&quot;created_at&quot;</span>, <span class="s2">&quot;email&quot;</span>, <span class="s2">&quot;name&quot;</span>, <span class="s2">&quot;updated_at&quot;</span><span class="o">)</span> VALUES <span class="o">(</span>?, ?, ?, ?<span class="o">)</span>
+      <span class="o">[[</span><span class="s2">&quot;created_at&quot;</span>, 2012-12-26 08:32:51 +0100<span class="o">]</span>, <span class="o">[</span><span class="s2">&quot;email&quot;</span>, <span class="s2">&quot;matthias.guenther&quot;</span><span class="o">]</span>, <span class="o">[</span><span class="s2">&quot;name&quot;</span>, <span class="s2">&quot;Matthias Günther&quot;</span><span class="o">]</span>,
+      <span class="o">[</span><span class="s2">&quot;updated_at&quot;</span>, 2012-12-26 08:32:51 +0100<span class="o">]]</span>
+        DEBUG -  <span class="o">(</span>342.0ms<span class="o">)</span>  commit <span class="nv">transaction</span>
+    <span class="o">=</span>&gt; <span class="c">#&lt;User id: 1, name: &quot;Matthias Günther&quot;, email: &quot;matthias.guenther&quot;, created_at: &quot;2012-12-26 08:32:51&quot;,</span>
+        updated_at: <span class="s2">&quot;2012-12-26 08:32:51&quot;</span>&gt;
+      &gt;&gt;
+</pre></div>
+<p>Please note that now you have an entry in your development database <code>db/job_vacancy_development.db</code>. To see this,
+connect to the database and execute a &#39;SELECT&#39; statement::</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>sqlite3 db/job_vacancy_development.db
+    SQLite version 3.7.13 2012-06-11 02:05:22
+    Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for </span>instructions
+    Enter SQL statements terminated with a <span class="s2">&quot;;&quot;</span>
+    sqlite&gt; SELECT * FROM users;
+    1|Matthias Günther|matthias.guenther|2012-12-26 08:32:51.323349|2012-12-26 08:32:51.323349
+    sqlite&gt;.exit
+</pre></div>
+<p>Since we have an user, it&#39;s time to some job offers too:</p>
+<div class="highlight"><pre>     <span class="nv">$ </span>padrino <span class="nv">c</span>
+     <span class="o">=</span>&gt; Loading development console <span class="o">(</span>Padrino v.0.10.7<span class="o">)</span>
+     <span class="o">=</span>&gt; Loading Application JobVacancy
+      JobOffer.create<span class="o">(</span>:title <span class="o">=</span>&gt; <span class="s1">&#39;Padrino Engineer&#39;</span>,
+        :location <span class="o">=</span>&gt; <span class="s1">&#39;Berlin&#39;</span>,
+        :description <span class="o">=</span>&gt; <span class="s1">&#39;Come to this great place&#39;</span>,
+        :contact <span class="o">=</span>&gt; <span class="s1">&#39;recruter@padrino-company.org&#39;</span>,
+        :time_start <span class="o">=</span>&gt; <span class="s1">&#39;2013/01/01&#39;</span>,
+        :time_end <span class="o">=</span>&gt; <span class="s1">&#39;2013/03/01&#39;</span>,
+        :user_id <span class="o">=</span>&gt; 1<span class="o">)</span>
+      ...
+        <span class="o">=</span>&gt; <span class="c">#&lt;JobOffer id: 1, title: &quot;Padrino Engineer&quot;, location: &quot;Berlin&quot;, description: &quot;Come to this great place&quot;,</span>
+        contact: <span class="s2">&quot;recruter@padrino-firm.org&quot;</span>, time_start: <span class="s2">&quot;2013-01-01&quot;</span>, time_end: <span class="s2">&quot;2013-03-01&quot;</span>, created_at: <span class="s2">&quot;2012-12-26</span>
+<span class="s2">        10:12:07&quot;</span>, updated_at: <span class="s2">&quot;2012-12-26 10:12:07&quot;</span>, user_id: 1&gt;
+</pre></div>
+<p>And now let&#39;s create a second one for our first user:</p>
+<div class="highlight"><pre>     &gt;&gt; JobOffer.create<span class="o">(</span>:title <span class="o">=</span>&gt; <span class="s1">&#39;Padrino Engineer 2&#39;</span>,
+         :location <span class="o">=</span>&gt; <span class="s1">&#39;Berlin&#39;</span>,
+         :description <span class="o">=</span>&gt; <span class="s1">&#39;Come to this great place&#39;</span>,
+         :contact <span class="o">=</span>&gt; <span class="s1">&#39;recruter@padrino-company.org&#39;</span>,
+         :time_start <span class="o">=</span>&gt; <span class="s1">&#39;2013/01/01&#39;</span>,
+         :time_end <span class="o">=</span>&gt; <span class="s1">&#39;2013/03/01&#39;</span>,
+         :user_id <span class="o">=</span>&gt; 1<span class="o">)</span>
+       ...
+         <span class="o">=</span>&gt; <span class="c">#&lt;JobOffer id: 2, title: &quot;Padrino Engineer 2&quot;, location: &quot;Berlin&quot;, description: &quot;Come to this great place&quot;,</span>
+         contact: <span class="s2">&quot;recruter@padrino-firm.org&quot;</span>, time_start: <span class="s2">&quot;2013-01-01&quot;</span>, time_end: <span class="s2">&quot;2013-03-01&quot;</span>, created_at: <span class="s2">&quot;2012-12-26</span>
+<span class="s2">         10:41:29&quot;</span>, updated_at: <span class="s2">&quot;2012-12-26 10:41:29&quot;</span>, user_id: 1&gt;
+</pre></div>
+<p>Now it&#39;s time to test our association between the user and the job-offer model. We will use the <code>find_by_id</code> method
+to get the user from our database, and the <code>job_offers</code> method to get all the job-offers from the user.</p>
+<div class="highlight"><pre>    &gt;&gt; <span class="nv">user</span> <span class="o">=</span> User.find_by_id<span class="o">(</span>1<span class="o">)</span>
+      DEBUG - User Load <span class="o">(</span>0.6ms<span class="o">)</span>  SELECT <span class="s2">&quot;users&quot;</span>.* FROM <span class="s2">&quot;users&quot;</span> WHERE <span class="s2">&quot;users&quot;</span>.<span class="s2">&quot;id&quot;</span> <span class="o">=</span> 1 LIMIT <span class="nv">1</span>
+      <span class="o">=</span>&gt; <span class="c">#&lt;User id: 1, name: &quot;Matthias Günther&quot;, email: &quot;matthias.guenther&quot;, created_at: &quot;2012-12-26 08:32:51&quot;, updated_at:</span>
+      <span class="s2">&quot;2012-12-26 08:32:51&quot;</span>&gt;
+    &gt;&gt; user.job_offers
+      DEBUG - JobOffer Load <span class="o">(</span>0.6ms<span class="o">)</span>  SELECT <span class="s2">&quot;job_offers&quot;</span>.* FROM <span class="s2">&quot;job_offers&quot;</span> WHERE <span class="s2">&quot;job_offers&quot;</span>.<span class="s2">&quot;user_id&quot;</span> <span class="o">=</span> <span class="nv">1</span>
+      <span class="o">=</span>&gt; <span class="o">[</span><span class="c">#&lt;JobOffer id: 1, title: &quot;Padrino Engineer&quot;, location: &quot;Berlin&quot;, description: &quot;Come to this great place&quot;,</span>
+      contact: <span class="s2">&quot;recruter@padrino-firm.org&quot;</span>, time_start: <span class="s2">&quot;2013-01-01&quot;</span>, time_end: <span class="s2">&quot;2013-03-01&quot;</span>, created_at: <span class="s2">&quot;2012-12-26</span>
+<span class="s2">      10:12:07&quot;</span>, updated_at: <span class="s2">&quot;2012-12-26 10:12:07&quot;</span>, user_id: 1&gt;, <span class="c">#&lt;JobOffer id: 2, title: &quot;Padrino Engineer 2&quot;, location:</span>
+      <span class="s2">&quot;Berlin&quot;</span>, description: <span class="s2">&quot;Come to this great place&quot;</span>, contact: <span class="s2">&quot;recruter@padrino-firm.org&quot;</span>, time_start: <span class="s2">&quot;2013-01-01&quot;</span>,
+      time_end: <span class="s2">&quot;2013-03-01&quot;</span>, created_at: <span class="s2">&quot;2012-12-26 10:41:29&quot;</span>, updated_at: <span class="s2">&quot;2012-12-26 10:41:29&quot;</span>, user_id: 1&gt;<span class="o">]</span>
+</pre></div>
+<p>Here you can see the advantage of using associations: When you declare them, you automatically get methods for accessing
+the data you want.</p>
+
+<p>Ok, we are doing great so far. With users and job offers in place, let&#39;s add some tests to create and associate these
+objects.</p>
+
+<h4>Testing our app with RSpec + Factory Girl</h4>
+
+<p>When you use data for the tests, you need to decide how to create them. You could, of course, define a set of test data
+with pure SQL and add it to your app. A more convenient solution instead is to use factories and fixtures. Think
+of factories as producers for you data. You are telling the factory that you need 10 users that should have different
+names and emails. This kind of mass object creation which are called fixtures in testing, can easily be done with
+<a href="https://github.com/thoughtbot/factory_girl">Factory Girl</a>. Factory Girl defines it&#39;s own language to create fixtures in
+an <code>ActiveRecord</code>-like way, but with a much cleaner syntax.</p>
+
+<p>What do we need to use Factory Girl in our app? Right, we first we need to add a gem to our <code>Gemfile</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># Gemfile</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="n">gem</span> <span class="s1">&#39;factory_girl&#39;</span><span class="p">,</span> <span class="s1">&#39;4.2.0&#39;</span><span class="p">,</span> <span class="ss">:group</span> <span class="o">=&gt;</span> <span class="s1">&#39;test&#39;</span>
+</pre></div>
+<p>If you pay a closer look into the <code>Gemfile</code>, you can see that we have several gems with the <code>:group</code> option:</p>
+<div class="highlight"><pre>    <span class="c1"># Gemfile</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="n">gem</span> <span class="s1">&#39;rspec&#39;</span> <span class="p">,</span> <span class="s1">&#39;2.13.0&#39;</span><span class="p">,</span> <span class="ss">:group</span> <span class="o">=&gt;</span> <span class="s1">&#39;test&#39;</span>
+    <span class="n">gem</span> <span class="s1">&#39;factory_girl&#39;</span><span class="p">,</span> <span class="s1">&#39;4.2.0&#39;</span><span class="p">,</span> <span class="ss">:group</span> <span class="o">=&gt;</span> <span class="s1">&#39;test&#39;</span>
+    <span class="n">gem</span> <span class="s1">&#39;rack-test&#39;</span><span class="p">,</span> <span class="s1">&#39;0.6.2&#39;</span><span class="p">,</span> <span class="ss">:require</span> <span class="o">=&gt;</span> <span class="s1">&#39;rack/test&#39;</span><span class="p">,</span> <span class="ss">:group</span> <span class="o">=&gt;</span> <span class="s1">&#39;test&#39;</span>
+</pre></div>
+<p>Luckily we can use the <code>:group &lt;name&gt; do ... end</code> syntax to cleanup  to get rid of several <code>:group =&gt; &#39;test&#39;</code> lines in
+our <code>Gemfile</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># Gemfile</span>
+
+    <span class="n">group</span> <span class="ss">:test</span> <span class="k">do</span>
+      <span class="n">gem</span> <span class="s1">&#39;rspec&#39;</span> <span class="p">,</span> <span class="s1">&#39;2.13.0&#39;</span>
+      <span class="n">gem</span> <span class="s1">&#39;factory_girl&#39;</span><span class="p">,</span> <span class="s1">&#39;4.2.0&#39;</span>
+      <span class="n">gem</span> <span class="s1">&#39;rack-test&#39;</span><span class="p">,</span> <span class="s1">&#39;0.6.2&#39;</span><span class="p">,</span> <span class="ss">:require</span> <span class="o">=&gt;</span> <span class="s1">&#39;rack/test&#39;</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Execute <code>bundle</code> and the new gem will be installed.</p>
+
+<p>Next we need to define a <em>factory</em> to include all the fixtures of our models:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/factories.rb</span>
+
+    <span class="c1"># encoding: utf-8</span>
+    <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+
+      <span class="n">factory</span> <span class="ss">:user</span> <span class="k">do</span>
+        <span class="nb">name</span> <span class="s2">&quot;Matthias Günther&quot;</span>
+        <span class="n">email</span> <span class="s2">&quot;matthias.guenther@wikimatze.de&quot;</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>I want to add myself as a test user. Since I&#39;m German, I want to use special symbols, called umlauts, from my language.
+To make Ruby aware of this, I&#39;m putting <code># encoding: utf-8</code> at the header of the file. The symbol <code>:user</code> stands for
+the definition for user model. To make our factory available in all our tests, we just have to <em>require</em> our factory
+in the <code>spec_helper.rb</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/spec_helper.rb</span>
+
+    <span class="no">PADRINO_ENV</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span> <span class="k">unless</span> <span class="n">defined?</span><span class="p">(</span><span class="no">PADRINO_ENV</span><span class="p">)</span>
+    <span class="nb">require</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/../config/boot&quot;</span><span class="p">)</span>
+    <span class="nb">require</span> <span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/factories&quot;</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</pre></div>
+<p>Now we have everything at hand to create a user with the factory while testing our app:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;User Model&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:job_offer</span><span class="p">)</span> <span class="p">{</span> <span class="p">{</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s1">&#39;Padrino Engineer&#39;</span><span class="p">,</span> <span class="ss">:location</span> <span class="o">=&gt;</span> <span class="s1">&#39;Berlin&#39;</span><span class="p">,</span> <span class="ss">:description</span> <span class="o">=&gt;</span> <span class="s1">&#39;Come to this great place&#39;</span><span class="p">}</span> <span class="p">}</span>
+      <span class="n">it</span> <span class="s1">&#39;can be created&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">should_not</span> <span class="n">be_nil</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;fresh user should have no offers&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;have job-offers&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">job_offer</span><span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="mi">1</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>The basic philosophy behind testing with fixtures is that you create objects as you need them with convenient
+expressions. Instead of using <code>User.create</code>, we are using <code>FactoryGirl.build(:user)</code> to temporarily create a <code>user</code>
+fixture. The job offer that we are adding for the tests is defined as an attribute hash - you map the attributes (keys)
+to their values. If you run the tests, they will pass.</p>
+
+<p>The <code>build</code> method that we use to create the user will only add the test object in memory. If you want to permanently
+add fixtures to the database, you have to use <code>create</code> instead. Play with it, and see that the same test using <code>create</code>
+instead of <code>build</code> takes much longer because it hits the database.</p>
+
+<p>We can improve our test by creating a factory for our job offer too and cleaning the <code>user_spec.rb</code> file:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/factories.rb</span>
+
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="n">factory</span> <span class="ss">:user</span> <span class="k">do</span>
+      <span class="nb">name</span> <span class="s2">&quot;Matthias Günther&quot;</span>
+      <span class="n">email</span> <span class="s2">&quot;matthias.guenther@wikimatze.de&quot;</span>
+    <span class="k">end</span>
+
+    <span class="n">factory</span> <span class="ss">:job_offer</span> <span class="k">do</span>
+      <span class="n">title</span> <span class="s2">&quot;Padrino Engineer&quot;</span>
+      <span class="n">location</span> <span class="s2">&quot;Berlin&quot;</span>
+      <span class="n">description</span> <span class="s2">&quot;We want you ...&quot;</span>
+      <span class="n">contact</span> <span class="s2">&quot;recruter@awesome.de&quot;</span>
+      <span class="n">time_start</span> <span class="s2">&quot;0/01/2013&quot;</span>
+      <span class="n">time_end</span> <span class="s2">&quot;01/03/2013&quot;</span>
+    <span class="k">end</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</pre></div>
+<p>And now we modify our <code>user_spec</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/user_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;User Model&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+      <span class="n">it</span> <span class="s1">&#39;can be created&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">should_not</span> <span class="n">be_nil</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;fresh user should have no offers&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;has job-offers&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="no">FactoryGirl</span><span class="o">.</span><span class="n">attributes_for</span><span class="p">(</span><span class="ss">:job_offer</span><span class="p">))</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="mi">1</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>As you see, the job fixtures us created with FactoryGirls&#39; <code>attributes_for</code> method. This method  takes a symbol as an
+input and returns the attributes of the fixture as a hash.</p>
+
+<p>Now, our tests are looking fine and they are still green. But we can do even better. We can remove the <code>FactoryGirl</code>
+expressions if we add make the following change to our <code>spec_helper.rb</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/spec_helper.rb</span>
+
+    <span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">conf</span><span class="o">|</span>
+      <span class="n">conf</span><span class="o">.</span><span class="n">include</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Test</span><span class="o">::</span><span class="no">Methods</span>
+      <span class="n">conf</span><span class="o">.</span><span class="n">include</span> <span class="ss">FactoryGirl</span><span class="p">:</span><span class="ss">:Syntax</span><span class="o">::</span><span class="no">Methods</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Now we can change our test to:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;User Model&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+      <span class="n">it</span> <span class="s1">&#39;can be created&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">should_not</span> <span class="n">be_nil</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;fresh user should have no offers&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;has job-offers&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">attributes_for</span><span class="p">(</span><span class="ss">:job_offer</span><span class="p">))</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">job_offers</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="mi">1</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+
+      <div class="prevnext">
+          <a class="prev" href="/output/02-01-creating-a-new-application.html">&laquo; Prev</a>
+          <a class="next" href="/output/02-03-user-login-and-registration.html">Next &raquo;</a>
+      </div>
+
+    </div>
+    <script>
+      $(function() {
+        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
+        prettyPrint();
+      });
+    </script>
+  </body>
+
+</html>
+

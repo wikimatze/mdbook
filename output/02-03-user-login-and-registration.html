@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset=utf-8" />
+    <title>Muss noch gemacht werden und dynamisch gesetzt sein </title>
+    <meta name="author" content="Matthias Guenther" />
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
+    <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+
+    <style text="text/css">
+      /*
+       * jquery.tocify.css 1.4.0
+       * Author: @gregfranko
+       */
+
+      /* The Table of Contents container element */
+      #toc {
+          width: 20%;
+          max-height: 90%;
+          overflow: auto;
+          margin-left: -22%;
+          position: fixed;
+          border: 1px solid #ccc;
+          webkit-border-radius: 6px;
+          moz-border-radius: 6px;
+          border-radius: 6px;
+      }
+
+      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
+      #toc ul, #toc li {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          line-height: 30px;
+      }
+
+      /* Top level header elements */
+      .header {
+          text-indent: 10px;
+      }
+
+      /* Top level subheader elements.  These are the first nested items underneath a header element. */
+      .sub-header {
+          text-indent: 20px;
+          display: none;
+      }
+
+      /* Makes the font smaller for all subheader elements. */
+      .sub-header li {
+          font-size: 12px;
+      }
+
+      /* Further indents second level subheader elements. */
+      .sub-header .sub-header {
+          text-indent: 30px;
+      }
+
+      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
+      .sub-header .sub-header .sub-header {
+          text-indent: 40px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a, .nav-list .nav-header {
+          margin: 0px;
+      }
+
+      /* Twitter Bootstrap Override Style */
+      .nav-list > li > a {
+          padding: 5px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+  <div id="toc"></div>
+    <div id="content">
+
+      <div class="prevnext">
+          <a class="prev" href="/output/02-02-creation-of-models.html">&laquo; Prev</a>
+      </div>
+
+      <h2>Registration and Login {#chapter-32}</h2>
+
+<p>In traditional frameworks you would generate a user with a <code>user</code> model and a <code>users_controller</code> with the actions
+<code>new</code>, <code>create</code>, <code>update</code>, and <code>delete</code>. And you can&#39;t forget about security these days it would be nice to to have
+something at hand to save At the end we would need to find a method of safely storing the password for the user.</p>
+
+<p>Of course, we could use you don&#39;t have to reinvent the wheel you can use Padrino&#39;s beautiful
+<a href="http://www.padrinorb.com/guides/padrino-admin">Admin interface</a> for your user authentication to prevent us from
+reinventing the wheel. But with that we won&#39;t learn the basics and as you will see in this chapter you can make a lot of
+mistakes. So step into the part of creating user, sending confirmation mails, and understanding how sessions are
+managed in Padrino.</p>
+
+<h3>Extending the User Model</h3>
+
+<p>Before we are going to build the controller and the sign-up form for our application we need to specify the data each
+user has.</p>
+<div class="highlight"><pre>    Name: String
+    Email: String
+    Password: String
+</pre></div>
+<p>Recording from chapter <a href="#chapter-32">Registration and Login</a> we only need to add the <code>Password</code> fields to the user table:</p>
+
+<p>Let&#39;s create the migration:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g migration AddRegistrationFieldsToUsers
+
+    apply  orms/activerecord
+    create  db/migrate/004_add_registration_fields_to_users.rb
+</pre></div>
+<p>And write the fields into the migration file:</p>
+<div class="highlight"><pre>    <span class="c1"># db/migrate/004_add_registration_fields_to_users.rb</span>
+
+    <span class="k">class</span> <span class="nc">AddRegistrationFieldsToUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+
+      <span class="vi">@fields</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:password</span><span class="o">]</span>
+
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
+        <span class="n">change_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+          <span class="vi">@fields</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">field</span><span class="o">|</span> <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="n">field</span><span class="p">}</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">down</span>
+        <span class="n">change_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+          <span class="vi">@fields</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">field</span><span class="o">|</span> <span class="n">remove_column</span> <span class="n">field</span><span class="p">}</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<h3>Validating attributes</h3>
+
+<p>Before we are going to implement what we think, we are going to write <strong>pending</strong> specs:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;User Model&quot;</span> <span class="k">do</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+      <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;no blank name&#39;</span><span class="p">)</span>
+      <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;no blank email&#39;</span><span class="p">)</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;passwords&quot;</span> <span class="k">do</span>
+        <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;no blank password&#39;</span><span class="p">)</span>
+        <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;no blank password_confirmation&#39;</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;when name is already used&quot;</span> <span class="k">do</span>
+        <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;should not be saved&#39;</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;email address&quot;</span> <span class="k">do</span>
+        <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;valid&#39;</span><span class="p">)</span>
+        <span class="n">pending</span><span class="p">(</span><span class="s1">&#39;not valid&#39;</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>(The <em>pending</em> word is optional. It is enough to write pending tests only in the form <code>it &quot;test this&quot;</code> and leaving the
+do/end block away).</p>
+
+<p>Before writing code to pass these specs, we need to add the <code>password</code> field to our factory:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/factories.rb</span>
+    <span class="c1"># encoding: utf-8</span>
+    <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="n">factory</span> <span class="ss">:user</span> <span class="k">do</span>
+        <span class="nb">name</span>  <span class="s2">&quot;Matthias Günther&quot;</span>
+        <span class="n">email</span> <span class="s2">&quot;matthias.guenther@wikimatze.de&quot;</span>
+        <span class="n">password</span> <span class="s2">&quot;octocat&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Use the encoding property to allow special symbols from Germany - you have to add them in your files where they may
+occur. Let&#39;s implement the first pending test that a user can&#39;t have an empty name:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="n">it</span> <span class="s1">&#39;have no blank name&#39;</span> <span class="k">do</span>
+      <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+      <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="o">.</span><span class="n">should</span> <span class="n">be_false</span>
+    <span class="k">end</span>
+</pre></div>
+<p>If we run the test we get the following error:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec
+
+    Failures:
+
+      1<span class="o">)</span> User Model have no blank name
+         Failure/Error: user.save.should be_false
+           expected: <span class="nb">false </span>value
+                got: <span class="nb">true</span>
+         <span class="c"># ./spec/app/models/user_spec.rb:20:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
+
+    Finished in 0.42945 seconds
+    10 examples, 1 failure, 5 pending
+
+    Failed examples:
+
+    rspec ./spec/app/models/user_spec.rb:18 <span class="c"># User Model have no blank name</span>
+</pre></div>
+<p>To make this test pass we need to validate the <code>email</code> property in our user model with the help of the
+<a href="http://guides.rubyonrails.org/active_record_validations_callbacks.html#presence">presence option</a>:</p>
+<div class="highlight"><pre>  <span class="c1"># app/models/user.rb</span>
+
+  <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+    <span class="n">validates</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:presence</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+
+    <span class="n">has_many</span> <span class="ss">:job_offers</span>
+  <span class="k">end</span>
+</pre></div>
+<p>As an exercise, Please write the validates for <code>email</code> and <code>password</code> on your own.</p>
+
+<p>We don&#39;t want to have duplicated names in our application. To simply test this we need as second user with the same
+name. In order to create a second user with we need to have another mail address. In order to write the test for it, we
+need to extend or factory with the <a href="https://github.com/thoughtbot/factory_girl/wiki/Usage#sequences-and-associations">sequence function</a>:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/factories</span>
+    <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+      <span class="n">sequence</span><span class="p">(</span><span class="ss">:email</span><span class="p">){</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="s2">&quot;matthias.guenther</span><span class="si">#{</span><span class="n">n</span><span class="si">}</span><span class="s2">@wikimatze.de&quot;</span><span class="p">}</span>
+
+      <span class="n">factory</span> <span class="ss">:user</span> <span class="k">do</span>
+        <span class="nb">name</span>  <span class="s2">&quot;Matthias Günther&quot;</span>
+        <span class="n">email</span>
+        <span class="n">password</span> <span class="s2">&quot;foo&quot;</span>
+      <span class="k">end</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Whenever you build a new <code>user</code> fixture the value <code>email_number</code> is incremented and gives you so a fresh user
+with a unique email address. You can write a test for this ability in the following way:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+    <span class="n">describe</span> <span class="s2">&quot;when name is already used&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user_second</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+
+      <span class="n">it</span> <span class="s1">&#39;should not be saved&#39;</span> <span class="k">do</span>
+         <span class="n">user_second</span><span class="o">.</span><span class="n">save</span><span class="o">.</span><span class="n">should</span> <span class="n">be_false</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>To make the test green you have to use the <a href="http://guides.rubyonrails.org/active_record_validations_callbacks.html#uniqueness">uniqueness validation</a>.
+All what it does is to validates that the attribute&#39;s value is unique before it gets saved.</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="n">validates</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:presence</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+      <span class="n">validates</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:uniqueness</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+
+      <span class="n">has_many</span> <span class="ss">:job_offers</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Now this test is fixed. Next we are going to implement the validation for the email field:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user.spec</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;email address&quot;</span> <span class="k">do</span>
+      <span class="n">it</span> <span class="s1">&#39;valid&#39;</span> <span class="k">do</span>
+        <span class="n">adresses</span> <span class="o">=</span> <span class="sx">%w[thor@marvel.de hero@movie.com]</span>
+        <span class="n">adresses</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">email</span><span class="o">|</span>
+          <span class="n">user_second</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+          <span class="n">user_second</span><span class="o">.</span><span class="n">name</span><span class="o">=</span> <span class="n">email</span>
+          <span class="n">user_second</span><span class="o">.</span><span class="n">should</span> <span class="n">be_valid</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;not valid&#39;</span> <span class="k">do</span>
+        <span class="n">adresses</span> <span class="o">=</span> <span class="sx">%w[spamspamspam.de heman,test.com]</span>
+        <span class="n">adresses</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">email</span><span class="o">|</span>
+          <span class="n">user_second</span><span class="o">.</span><span class="n">email</span><span class="o">=</span> <span class="n">email</span>
+          <span class="n">user_second</span><span class="o">.</span><span class="n">should_not</span> <span class="n">be_valid</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</pre></div>
+<p>We can test the correctness of the <code>email</code> field with a regular expression. First we are going to define a regular
+expression and use the <a href="http://guides.rubyonrails.org/active_record_validations_callbacks.html#format">format validation</a> which takes our regular expression against which the field will be tested.</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="no">VALID_EMAIL_REGEX</span> <span class="o">=</span> <span class="sr">/\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i</span>
+      <span class="n">validates</span> <span class="ss">:email</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="p">{</span> <span class="ss">with</span><span class="p">:</span> <span class="no">VALID_EMAIL_REGEX</span> <span class="p">}</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<div class="active-box">
+<h3>  Regular Expressions</h3>
+ [Regular expressions](http://en.wikipedia.org/wiki/Regular_expression) are your first tool when you need to match certain parts (or whole) strings against a predefined pattern. The drawback of using them is that you have to learn a formal language to define your patterns. I can highly recommend you the [Rubular tool](http://rubular.com/) for training and trying out the expression you want to use It make it very easy to build and test your patterns against test data.
+</div>
+
+<h3>Users Controller</h3>
+
+<p>Since we already have a model for potential users of our platform, it&#39;s time to create a controller for them. We are
+creating in a first step our users controller four our sign up form with only one action:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g controller Users get:new
+      create  app/controllers/users.rb
+      create  app/helpers/users_helper.rb
+      create  app/views/users
+       apply  tests/rspec
+      create  spec/app/controllers/users_controller_spec.rb
+</pre></div>
+<p>The new thing about the controller command above is the <code>get:new</code> option. This will create an URL rout <code>:new</code> to
+<code>users/new</code>.</p>
+
+<h4>Sign up Form</h4>
+
+<p>The stage is set: We have the model with the tested constraints, and a controller for the user which handles the action.
+Time to create a sign up form for getting new users on our platform. For this case we can use the <code>form_for</code> helper.
+This method takes an object as its input and creates a form using the attributes of the object. We need this to
+save/edit the attributes of the model in our controller.</p>
+<div class="highlight"><pre>    <span class="c1"># views/users/new.erb</span>
+    <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Registration</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+
+<span class="sr">    &lt;% form_for(@user, &#39;/use</span><span class="n">rs</span><span class="o">/</span><span class="n">create</span><span class="err">&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="sx">%&gt;</span>
+<span class="sx">      &lt;%= f.label :name %&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= f.text_field :name %&gt;</span>
+<span class="sx">      &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:email</span> <span class="sx">%&gt;</span>
+<span class="sx">      &lt;%= f.text_field :email %&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= f.label :password %&gt;</span>
+<span class="sx">      &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">password_field</span> <span class="ss">:password</span> <span class="sx">%&gt;</span>
+<span class="sx">      &lt;%= f.label :password_confirmation %&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= f.password_field :password_confirmation %&gt;</span>
+<span class="sx">      &lt;p&gt;</span>
+<span class="sx">      &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="s2">&quot;Create&quot;</span><span class="p">,</span> <span class="ss">:class</span> <span class="o">=&gt;</span> <span class="s2">&quot;btn btn-primary&quot;</span> <span class="sx">%&gt;</span>
+<span class="sx">      &lt;/p&gt;</span>
+    <span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</pre></div>
+<p>There is a lot of stuff going on -- let&#39;s break it down:</p>
+
+<ul>
+<li><code>form_for</code>: Is part of <a href="http://www.padrinorb.com/guides/application-helpers#formbuilders">Padrino&#39;s Form Builder</a> and
+allows you to create standard input fields based on a model. The first argument to the function is an object (mostly a
+model), the second argument is an string (the action to which the form should be send after an submit), and the third
+parameter are settings in form of an hash which aren&#39;t used in this example. The part <code>action=&quot;/users/create&quot;</code> says,
+that we want to use the <code>create</code> action to the <code>users</code> controller with the <code>create</code> action.</li>
+<li><code>f.label</code> and <code>f.text</code>: Will a label and text field for the attributes of your model.</li>
+<li><code>f.password_field</code>: Constructs a password input, where the input is marked with stars,  from the given attribute of
+the form.</li>
+<li><code>f.submit</code>: Take an string as an caption for the submit button and options as hashes for additional parameter (for
+example <code>:class =&gt; &#39;long&#39;</code>).</li>
+</ul>
+
+<p>This form above will be rendered in the following HTML:</p>
+<div class="highlight"><pre>    <span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">&quot;post&quot;</span> <span class="na">action=</span><span class="s">&quot;/users/create&quot;</span> <span class="na">accept-charset=</span><span class="s">&quot;UTF-8&quot;</span><span class="nt">&gt;</span>  <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;user_name&quot;</span><span class="nt">&gt;</span>Name: <span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">&quot;user_name&quot;</span> <span class="na">name=</span><span class="s">&quot;user[name]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="nt">/&gt;</span>
+
+      <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;user_email&quot;</span><span class="nt">&gt;</span>Email: <span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">&quot;user_email&quot;</span> <span class="na">name=</span><span class="s">&quot;user[email]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="nt">/&gt;</span>
+
+      <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;user_password&quot;</span><span class="nt">&gt;</span>Password: <span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">&quot;user_password&quot;</span> <span class="na">name=</span><span class="s">&quot;user[password]&quot;</span> <span class="na">type=</span><span class="s">&quot;password&quot;</span> <span class="nt">/&gt;</span>
+
+      <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;user_password_confirmation&quot;</span><span class="nt">&gt;</span>Password confirmation: <span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">&quot;user_password_confirmation&quot;</span> <span class="na">name=</span><span class="s">&quot;user[password_confirmation]&quot;</span> <span class="na">type=</span><span class="s">&quot;password&quot;</span> <span class="nt">/&gt;</span>
+
+      <span class="nt">&lt;p&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">class=</span><span class="s">&quot;btn btn-primary&quot;</span> <span class="na">value=</span><span class="s">&quot;Create&quot;</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="nt">/&gt;</span>
+      <span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;/form&gt;</span>
+</pre></div>
+<h4>Mailer</h4>
+
+<p>We could go on and parametrized our email example above, but this would mean that we have email code directly into our
+controller code. We can do better by wrapping up the logic into an object and let it handle the action.</p>
+
+<p><a href="http://www.padrinorb.com/api/Padrino/Mailer.html">Padrino mailer</a> has the <code>mailer</code> command to create customized mailer
+for every purpose we want to use. Let&#39;s create the registration mailer:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g mailer Registration registration_email
+      create  app/mailers/registration.rb
+      create  app/views/mailers/registration
+</pre></div>
+<p>Let&#39;s break it down:</p>
+
+<ul>
+<li><code>mailer</code>: The command to create a custom mailer. Inside a mailer you can define the name of your mailer object and
+it&#39;s different templates. The name of our first email is <code>registration_email</code>.</li>
+<li><code>Registration</code>: Name of the mailer.</li>
+</ul>
+
+<p>Now we let&#39;s look into the <code>registration.rb</code> file:</p>
+<div class="highlight"><pre>    <span class="c1"># app/mailers/registration.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="no">App</span><span class="o">.</span><span class="n">mailer</span> <span class="ss">:registration</span> <span class="k">do</span>
+      <span class="n">email</span> <span class="ss">:registration_email</span> <span class="k">do</span>
+        <span class="c1"># Your mailer goes here</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>The generated comment <code># Your mailer goes here</code> says what you have to do. So let&#39;s remove the code from our <code>users</code>
+controller and move it to this place.</p>
+<div class="highlight"><pre>    <span class="c1"># app/mailers/registration.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">mailer</span> <span class="ss">:registration</span> <span class="k">do</span>
+      <span class="n">email</span> <span class="ss">:registration_email</span> <span class="k">do</span>
+        <span class="n">from</span> <span class="s2">&quot;admin@job-vacancy.de&quot;</span>
+        <span class="n">to</span> <span class="s2">&quot;lordmatze@gmail.com&quot;</span>
+        <span class="n">subject</span> <span class="s2">&quot;Welcome!&quot;</span>
+        <span class="n">body</span> <span class="s2">&quot;Hallo&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Now we can use the <em>deliver</em> method to call our <code>:registration</code> mailer with it&#39;s template <code>:registration_email</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controller/users.rb</span>
+
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+      <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+      <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">deliver</span><span class="p">(</span><span class="ss">:registration</span><span class="p">,</span> <span class="ss">:registration_email</span><span class="p">)</span>
+        <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+      <span class="k">else</span>
+        <span class="n">render</span> <span class="s1">&#39;users/new&#39;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</pre></div>
+<p>Difference between Padrino&#39;s Mailer methods email and deliver The <a href="http://www.padrinorb.com/api/Padrino/Mailer/Helpers/ClassMethods.html#email-instance_method">email</a> method is has the parameters <code>mail_attributes = {}, &amp;block</code>. That means the you write emails directly <code>JobVacancy.email(:to =&gt; &#39;...&#39;, :from =&gt; &#39;...&#39;, :subject =&gt; &#39;...&#39;, :body =&gt; &#39;...&#39;)</code> or use the block syntax <code>JobVacancy.email do ... end</code>. In comparison to this is the <a href="http://www.padrinorb.com/api/Padrino/Mailer/Helpers/ClassMethods.html#deliver-instance_method">deliver</a> method. It has <code>mailer_name, message_name, *attributes</code> as attributes. In order to use this you always to create a Mailer for them. If you want to use very simple mails in your application, prefer to use the email method. But if you have templates with a much more complex layout in different formats (plain, HTML), the deliver method is the best fit.</p>
+
+<p>Instead of writing only a simple &quot;Hallo&quot; in our email we would like to give more input. First we need to write an
+template and then use the <code>render</code> method in our registration mailer. Let&#39;s define the registration template:</p>
+<div class="highlight"><pre>    <span class="c"># app/views/mailers/registration/registration_email.plain.erb</span>
+
+    Hi ...,
+
+    we are glad to have you on our platform. Feel free to post <span class="nb">jobs </span>and find the right people <span class="k">for </span>your application.
+
+    Your Job Vacancy!
+</pre></div>
+<p>And now we make sure that we are rendering this template in our registration mailer:</p>
+<div class="highlight"><pre>    <span class="c1"># app/mailers/registration.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">mailer</span> <span class="ss">:registration</span> <span class="k">do</span>
+      <span class="n">email</span> <span class="ss">:registration_email</span> <span class="k">do</span>
+        <span class="n">from</span> <span class="s2">&quot;admin@job-vacancy.de&quot;</span>
+        <span class="n">to</span> <span class="s2">&quot;lordmatze@gmail.com&quot;</span>
+        <span class="n">subject</span> <span class="s2">&quot;Welcome!&quot;</span>
+        <span class="n">render</span> <span class="s1">&#39;registration/registration_email&#39;</span>
+        <span class="n">content_type</span> <span class="ss">:plain</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>If you are sure that you only want to send plain text mail, you can leave the <code>plain</code> extension away but making it
+explicit will make it clear what you want to do.</p>
+
+<p>To make our email more personal we want to add the name of our freshly registered user to our email template. In order
+to do this we need to use enable the <code>locals</code> option.</p>
+<div class="highlight"><pre>    <span class="c1"># app/mailers/registration.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">mailer</span> <span class="ss">:registration</span> <span class="k">do</span>
+      <span class="n">email</span> <span class="ss">:registration_email</span> <span class="k">do</span> <span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">email</span><span class="o">|</span>
+        <span class="n">from</span> <span class="s2">&quot;admin@job-vacancy.de&quot;</span>
+        <span class="n">to</span> <span class="n">email</span>
+        <span class="n">subject</span> <span class="s2">&quot;Welcome!&quot;</span>
+        <span class="n">locals</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="nb">name</span>
+        <span class="n">render</span> <span class="s1">&#39;registration/registration_email&#39;</span>
+        <span class="n">content_type</span> <span class="ss">:plain</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>This options enables a hash which we be used in the email template. Now we need to pass the name to the call of our
+method in our <code>users</code> controller:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/users.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+      <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">deliver</span><span class="p">(</span><span class="ss">:registration</span><span class="p">,</span> <span class="ss">:registration_email</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+      <span class="k">else</span>
+        <span class="n">render</span> <span class="s1">&#39;users/new&#39;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>And update our template with the name variable:</p>
+<div class="highlight"><pre><span class="x">    # app/views/mailers/registration/registration_email.plain.erb</span>
+
+<span class="x">    Hi </span><span class="cp">&lt;%=</span> <span class="nb">name</span> <span class="cp">%&gt;</span><span class="x">,</span>
+
+<span class="x">    we are glad to have you on our platform. Feel free to post jobs and find the right people for your application.</span>
+
+<span class="x">    Your Job Vacancy!</span>
+</pre></div>
+<p>Next we want to add a PDF which explains the main business needs to our page. For this purpose we create add the
+<code>welcome.pdf</code> into the <code>/app/assets/pdf</code> folder. We can attach files (images, PDF, video) with the
+<a href="https://github.com/mikel/mail/blob/master/lib/mail/message.rb#L1678">add_file method</a> which takes a filename and the
+content as hash elements as arguments.</p>
+<div class="highlight"><pre>    <span class="c1"># app/mailers/registration.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="n">email</span> <span class="ss">:registration_email</span> <span class="k">do</span> <span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">email</span><span class="o">|</span>
+      <span class="n">from</span> <span class="s2">&quot;admin@job-vacancy.de&quot;</span>
+      <span class="n">to</span> <span class="n">email</span>
+      <span class="n">subject</span> <span class="s2">&quot;Welcome!&quot;</span>
+      <span class="n">locals</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="nb">name</span><span class="p">,</span> <span class="ss">:email</span><span class="o">=&gt;</span> <span class="n">email</span>
+      <span class="n">render</span> <span class="s1">&#39;registration/registration_email&#39;</span>
+      <span class="n">add_file</span> <span class="ss">:filename</span> <span class="o">=&gt;</span> <span class="s1">&#39;welcome.pdf&#39;</span><span class="p">,</span> <span class="ss">:content</span> <span class="o">=&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/app/assets/pdfs/welcome.pdf&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">}</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Please correct me if there is a better way to get to the asset folder but that is all of what I&#39;ve found.</p>
+
+<p>During writing this chapter I experiment with the <code>content_type</code> option. If you set the <code>content_type</code> to plain you will
+get the attachment based as binary code directly into your mail. Please put the <code>content_type :plain</code> into the
+<code>registration</code> mailer. If the mail will be send you can see something like this in your logs:</p>
+<div class="highlight"><pre>        DEBUG - Sending email to: lordmatze@gmail.com
+      Date: Thu, 18 Apr 2013 18:34:15 +0200
+      From: admin@job-vacancy.de
+      To: lordmatze@gmail.com
+      Message-ID: &lt;5170208754967_70f748e80108323a@mg.mail&gt;
+      Subject: Welcome!
+      Mime-Version: 1.0
+      Content-Type: text/plain
+      Content-Transfer-Encoding: 7bit
+
+      ----<span class="o">==</span>_mimepart_517020874676e_70f748e8010829d8
+      Date: Thu, 18 Apr 2013 18:34:15 +0200
+      Mime-Version: 1.0
+      Content-Type: text/plain;
+       <span class="nv">charset</span><span class="o">=</span>UTF-8
+      Content-Transfer-Encoding: 7bit
+      Content-ID: &lt;5170208753fd5_70f748e8010831c1@mg.mail&gt;
+
+      Hi Bob,
+
+      we are glad to have you on our platform. Feel free to post <span class="nb">jobs </span>and find the right people <span class="k">for </span>your application.
+
+      Your Job Vacancy!
+
+      ----<span class="o">==</span>_mimepart_517020874676e_70f748e8010829d8
+      Date: Thu, 18 Apr 2013 18:34:15 +0200
+      Mime-Version: 1.0
+      Content-Type: application/pdf;
+       <span class="nv">charset</span><span class="o">=</span>UTF-8;
+       <span class="nv">filename</span><span class="o">=</span>welcome2.pdf
+      Content-Transfer-Encoding: base64
+      Content-Disposition: attachment;
+       <span class="nv">filename</span><span class="o">=</span>welcome2.pdf
+      Content-ID: &lt;517020874ba76_70f748e80108301@mg.mail&gt;
+
+      JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0Zp
+      bHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nDPQM1Qo5ypUMABCM0MjBXNL
+      ...
+      <span class="c"># You don&#39;t want to read four pages of strange characters ...</span>
+      ...
+
+      ----<span class="o">==</span>_mimepart_517020874676e_70f748e8010829d8--
+</pre></div>
+<p>## MIME? MIME stands for &quot;Multipurpose Internet Mail Extensions&quot; and they specify additional attributes to email headers like the content type and define transfer encodings which can be used to present a higher encoded file (e.g. 8-bit) with the 7-bit ASCII character set. This makes it possible to put non-English characters in the message header like the subject. The goal of the MIME definition was that existing email servers had nothing to change in order to use MIME types. This means that MIME headers are optional for plain text emails and so even none MIME messages can be read correctly by a clients being able to read MIME encoded messages.</p>
+
+<h4>Sending Email With Confirmation Link</h4>
+
+<p>The basic steps for implementing the logic of email confirmation are the following:</p>
+
+<ul>
+<li>We need to add the <em>confirmation_code</em> and <em>confirmation</em> attributes in our user model.</li>
+<li>Create a controller method for our user model that expects a user id and confirmation code, looks up the user, checks
+the code in the parameter matches the code saved in our database and clears the code after confirmation.</li>
+<li>Create an action that maps to our new controller method (e.g. <code>/confirm/&lt;user-id&gt;/&lt;code&gt;</code>).</li>
+<li>Create an Mailer template which takes the user as a parameter and use the <em>confirmation code</em> of the user to send
+a mail containing a link to the new route in our controller.</li>
+<li>Create an <strong>observer</strong> for our user model. If the email of the user needs to be modified or a record is created we
+need to create a confirmation code, set it in the model and clear the confirmation flag. After that we need to
+trigger our Mailer.</li>
+<li>Create a helper method which allows views to check if the current user is confirmed.</li>
+<li>Protect our controller methods and views to prevent security issues.</li>
+</ul>
+
+<h2>Why Confirmation Mail Check that the user actually signed up for the account and actually wants it. This also helps you from spamming your platform is going to be floated with billions of users. Another usage of this information is to give your users a chance to change their password and/or stay in contact with them to inform them about updates.</h2>
+
+<h4>Add confirmation code and confirmation attributes to the User Model</h4>
+
+<p>Create a good migration which fits to the task we want to do:</p>
+<div class="highlight"><pre>    padrino g migration add_confirmation_code_and_confirmation_to_users
+       apply  orms/activerecord
+      create  db/migrate/005_add_confirmation_code_and_confirmation_to_users.rb
+</pre></div>
+<p>Now let&#39;s add the fields to a migration:</p>
+<div class="highlight"><pre>    <span class="c1"># db/migrate/005_add_confirmation_code_and_confirmation_to_users.rb</span>
+
+    <span class="k">class</span> <span class="nc">AddConfirmationCodeAndConfirmationToUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
+        <span class="n">change_table</span> <span class="ss">:users</span> <span class="k">do</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:confirmation_code</span>
+          <span class="n">t</span><span class="o">.</span><span class="n">boolean</span> <span class="ss">:confirmation</span><span class="p">,</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="kp">false</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">down</span>
+        <span class="n">change_table</span> <span class="ss">:users</span> <span class="k">do</span>
+          <span class="n">remove_column</span> <span class="ss">:confirmation_code</span><span class="p">,</span> <span class="ss">:confirmation</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>We added the <code>:default</code> option which sets the confirmation for every user to false if a new one is registered. Now
+let&#39;s migrate our production and test database to this new event:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino ar:migrate
+    <span class="nv">$ </span>padrino ar:migrate -e <span class="nb">test</span>
+</pre></div>
+<h4>My Tests are Slow ...</h4>
+
+<p>During writing this book I discovered various strange behavior for my tests because I was writing data into my
+test database. So the tests weren&#39;t really reliable because some worked only when the database is fresh with no
+preexisting entries. One solution would be to clean up the database before each run:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>sqlite3 db/job_vacancy_test.db
+      SQLite version 3.7.13 2012-06-11 02:05:22
+      Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for </span>instructions
+      Enter SQL statements terminated with a <span class="s2">&quot;;&quot;</span>
+      sqlite&gt; DELETE FROM users;
+      sqlite&gt; .quit
+</pre></div>
+<p>But after this my tests were running very slow:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec
+    ...
+
+    Finished in 1.61 seconds
+    25 examples, 0 failures
+</pre></div>
+<p>Running them again make them a little bit faster:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec
+    ...
+
+    Finished in 0.77209 seconds
+    25 examples, 0 failures
+</pre></div>
+<p>Why? Because we are hitting the database and our tests slow. Please consider code like the following:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;when name is already used&quot;</span> <span class="k">do</span>
+      <span class="n">it</span> <span class="s1">&#39;should not be saved&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">user_second</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">user_second</span><span class="o">.</span><span class="n">should_not</span> <span class="n">be_valid</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;when email address is already used&quot;</span> <span class="k">do</span>
+      <span class="n">it</span> <span class="s1">&#39;should not save an user with an existing address&#39;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">user_second</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+        <span class="n">user_second</span><span class="o">.</span><span class="n">save</span><span class="o">.</span><span class="n">should</span> <span class="n">be_false</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>We can use mocks the saving operation away. The benefit of mocks are that you create the environment you want to test
+and don&#39;t care about all the preconditions to make this test possible.</p>
+
+<p>Consider the following code example:</p>
+<div class="highlight"><pre>  <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_email</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:email</span><span class="o">]</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">params</span><span class="o">[</span><span class="ss">:password</span><span class="o">]</span>
+      <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+    <span class="k">else</span>
+      <span class="n">render</span> <span class="s1">&#39;/sessions/new&#39;</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</pre></div>
+<p>In order to test the condition <code>if user &amp;&amp; user.confirmation &amp;&amp; user.password == params[:password]</code> to return the
+redirect we need find a User by email out of our database. A normal test would be in need to
+create a user, save it and giving the object the right attributes to pass it. We can use mocks to simulate this
+environment by creating a user out of our users factory, setting the attributes of this object and cheating our
+<code>find-by-email</code> method to return our factory user with the right params without actually saving our object to the
+database:</p>
+<div class="highlight"><pre>    <span class="n">it</span> <span class="s2">&quot;should redirect if user is correct&quot;</span> <span class="k">do</span>
+      <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">=</span> <span class="kp">true</span>
+      <span class="no">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:find_by_email</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+      <span class="n">post</span> <span class="s2">&quot;sessions/create&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">attributes</span>
+
+      <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_redirect</span>
+    <span class="k">end</span>
+</pre></div>
+<p>The magic behind mocking is to use the <a href="https://github.com/rspec/rspec-mocks#message-expectations">should_receive</a> and
+<a href="https://github.com/rspec/rspec-mocks#consecutive-return-values">and_return</a> flow. <code>Should_receive</code> says which method
+should be called and <code>and_return</code> what should be returned when the specified method is called. The line size of our
+tests will remain the same - you only have to write more characters :) but this will speed up your tests in the long
+term. With the help of mocks you keep your tests fast and robust.</p>
+
+<p>Even if this will be the first application you write, when you&#39;ve learned something new and this will make your life
+easier, go back and take your time to enhance the style and design of your application.</p>
+
+<h3>Controller Method and Action For Password Confirmation</h3>
+
+<p>When we are going to register a new user, we need to create a confirmation code like in the example above. Since this is
+business logic, we will put this method inside our users model. First we will write a failing test:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;confirmation code&quot;</span> <span class="k">do</span>
+        <span class="n">let</span><span class="p">(</span><span class="ss">:user_confirmation</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+
+        <span class="n">it</span> <span class="s1">&#39;should not be blank&#39;</span> <span class="k">do</span>
+          <span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+          <span class="n">user_confirmation</span><span class="o">.</span><span class="n">valid?</span><span class="o">.</span><span class="n">should</span> <span class="n">be_false</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+</pre></div>
+<p>To make this test pass we add the validates presence of ability in our user model:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="n">validates</span> <span class="ss">:confirmation_code</span><span class="p">,</span> <span class="ss">:presence</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Next we need think of how we can set the <code>confirmation_code</code> information to our freshly created user. Instead of
+creating a confirmation code on our own, we want to encrypt the password by some mechanism. Luckily, we
+can use <a href="https://github.com/codahale/bcrypt-ruby/">bcrypt gem</a> to create our confirmation code. It is
+a Ruby binding for the <a href="http://en.wikipedia.org/wiki/OpenBSD_security_features">OpenBSD bcrypt</a> password hashing
+algorithm. In order to use this in our app we need to add it to our <code>Gemfile</code>:</p>
+<div class="highlight"><pre>    <span class="c1"># Gemfile</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="c1"># Security</span>
+    <span class="n">gem</span> <span class="s1">&#39;bcrypt-ruby&#39;</span><span class="p">,</span> <span class="s1">&#39;3.0.1&#39;</span><span class="p">,</span> <span class="ss">:require</span> <span class="o">=&gt;</span> <span class="s1">&#39;bcrypt&#39;</span>
+</pre></div>
+<p>Now let&#39;s open the console and play around with this Gem:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino <span class="nv">c</span>
+    <span class="o">=</span>&gt; Loading development console <span class="o">(</span>Padrino v.0.11.1<span class="o">)</span>
+    <span class="o">=</span>&gt; Loading Application JobVacancy
+    &gt;&gt; <span class="nv">password</span> <span class="o">=</span> <span class="s2">&quot;Test11111134543&quot;</span>
+    <span class="o">=</span>&gt; <span class="s2">&quot;Test11111134543&quot;</span>
+    &gt;&gt; <span class="nv">salt</span> <span class="o">=</span> <span class="s2">&quot;$2a$05$CCCCCCCCCCCCCCCCCCCCC.E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW&quot;</span>
+    <span class="o">=</span>&gt; <span class="s2">&quot;$2a$05$CCCCCCCCCCCCCCCCCCCCC.E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW&quot;</span>
+    &gt;&gt; BCrypt::Engine.hash_secret<span class="o">(</span>password, salt<span class="o">)</span>
+    <span class="o">=</span>&gt; <span class="s2">&quot;$2a$05$CCCCCCCCCCCCCCCCCCCCC.9APD.dklRtXYdki/E3XrHiCWd/rfAFu&quot;</span>
+</pre></div>
+<p>## What is a Salt? Salts are used in cryptography as random data to be put as addition to normal password to create a encrypted with the help of a one-way function. A one-way function output by some input string very easily but the other way round is very difficult for the computer to compute the original string from the output. Salts make it more difficult for hackers to get the password via rainbow tables attacks. Rainbow tables are a huge list of precomputed hashes for widely used password. If a hacker gets access to a password hash he then just compare this hash with the entries. If he finds after which he was searching he got the password for the user.</p>
+
+<p>We could add these methods in the users controller but that isn&#39;t something a controller should do. We better use a
+<a href="http://guides.rubyonrails.org/active_record_validations_callbacks.html#callbacks-overview">callback</a>.
+<strong>Callbacks</strong> are methods to run on a certain stage or life cycle of an object. Perfect, that&#39;s what we want
+let&#39;s create code for it:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="c1"># The other validations</span>
+
+      <span class="n">before_save</span> <span class="ss">:encrypt_confirmation_code</span><span class="p">,</span> <span class="ss">:if</span> <span class="o">=&gt;</span> <span class="ss">:registered?</span> <span class="c1"># our callback with if condition</span>
+
+      <span class="kp">private</span>
+      <span class="k">def</span> <span class="nf">encrypt_confirmation_code</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="n">set_confirmation_code</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">set_confirmation_code</span>
+        <span class="nb">require</span> <span class="s1">&#39;bcrypt&#39;</span>
+        <span class="n">salt</span> <span class="o">=</span> <span class="ss">BCrypt</span><span class="p">:</span><span class="ss">:Engine</span><span class="o">.</span><span class="n">generate_salt</span>
+        <span class="n">confirmation_code</span> <span class="o">=</span> <span class="ss">BCrypt</span><span class="p">:</span><span class="ss">:Engine</span><span class="o">.</span><span class="n">hash_secret</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="n">salt</span><span class="p">)</span>
+        <span class="n">normalize_confirmation_code</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">normalize_confirmation_code</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+        <span class="n">confirmation_code</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">registered?</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">new_record?</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>We won&#39;t test the methods under the private keyword, there is no customized business logic inside these methods.  We
+will even not test the difficult looking <code>set_confirmation_code</code> method because there is no customized business logic
+inside, and BCrypt is well tested.</p>
+
+<p>## Why making callbacks private? It is good practice to make your callbacks private so that they can called only from inside the model and no other object can use these methods. Our <code>confirmation_code</code> method is public available but that is no problem, because it just generates an random string.</p>
+
+<p>After creating the confirmation code mechanism for our user, we need to implement a authenticate which takes the
+confirmation code as an input and mark our user as <em>confirmed</em>. As always, let&#39;s begin with failing tests first:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_spec.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;confirmation code&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user_confirmation</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+
+      <span class="n">it</span> <span class="s1">&#39;should not be blank&#39;</span> <span class="k">do</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">valid?</span><span class="o">.</span><span class="n">should</span> <span class="n">be_false</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;should authenticate user with correct confirmation code&#39;</span> <span class="k">do</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">confirmation_of_saved_user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">user_confirmation</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="n">confirmation_of_saved_user</span><span class="o">.</span><span class="n">confirmation_code</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation_code</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be_true</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;confirmation should be set true after a user is authenticated&#39;</span> <span class="k">do</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">confirmation_of_saved_user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">user_confirmation</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="n">confirmation_of_saved_user</span><span class="o">.</span><span class="n">confirmation_code</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation_code</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be_true</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">confirmation</span><span class="o">.</span><span class="n">should</span> <span class="n">be_true</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;should not authenticate user with incorrect confirmation code&#39;</span> <span class="k">do</span>
+        <span class="n">user_confirmation</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="s2">&quot;wrong&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be_false</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>## Take care of your names!? During writing this chapter I lost a whole hour because I had method with the same name as the <code>confirmation_code</code> field. When I wanted to check <code>@user.confirmation_code</code> it always called the <code>confirmation_code</code> method which return a new confirmation code. I was thinking for a long time that it returned the attribute and was wondering what&#39;s going on. A couple of <a href="http://pryrepl.org/">pry</a> sessions showed me nothing since I&#39;m expected to be right. After I went to the toilet I started another pry session and out of sudden I discovered my naming problem. Lesson learned: Breaks are great!</p>
+
+<p>Before going on we need to update our <code>factory</code> for the test with the confirmation code field::</p>
+<div class="highlight"><pre>    <span class="c1"># spec/factories.rb</span>
+
+    <span class="c1"># encoding: utf-8</span>
+    <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="n">sequence</span><span class="p">(</span><span class="ss">:confirmation_code</span><span class="p">){</span> <span class="s2">&quot;1&quot;</span> <span class="p">}</span>
+      <span class="n">sequence</span><span class="p">(</span><span class="ss">:id</span><span class="p">){</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="n">n</span> <span class="p">}</span>
+
+      <span class="n">factory</span> <span class="ss">:user</span> <span class="k">do</span>
+        <span class="nb">id</span>
+        <span class="nb">name</span>
+        <span class="n">email</span>
+        <span class="n">password</span> <span class="s2">&quot;octocat&quot;</span>
+        <span class="n">confirmation_code</span>
+      <span class="k">end</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>We are making the <code>confirmation_code</code> with the value of 1 static because this make it easier for us to test the code.
+Here is now the code that makes our tests green:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+      <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">==</span> <span class="nb">self</span><span class="o">.</span><span class="n">confirmation_code</span>
+          <span class="nb">self</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">=</span> <span class="kp">true</span>
+          <span class="nb">self</span><span class="o">.</span><span class="n">save</span>
+          <span class="kp">true</span>
+        <span class="k">else</span>
+          <span class="kp">false</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Since our tests of our user model are now green, let&#39;s write tests for our /confirm route:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/controllers/users_controller.rb</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;GET confirm&quot;</span> <span class="k">do</span>
+    <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">}</span>
+      <span class="n">it</span> <span class="s2">&quot;render the &#39;users/confirm&#39; page if user has confirmation code&quot;</span> <span class="k">do</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">get</span> <span class="s2">&quot;/confirm/</span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">confirmation_code</span><span class="o">.</span><span class="n">to_s</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s2">&quot;redirect the :confirm if user id is wrong&quot;</span> <span class="k">do</span>
+        <span class="n">get</span> <span class="s2">&quot;/confirm/test/</span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">confirmation_code</span><span class="o">.</span><span class="n">to_s</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_redirect</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s2">&quot;redirect to :confirm if confirmation id is wrong&quot;</span> <span class="k">do</span>
+        <span class="n">get</span> <span class="s2">&quot;/confirm/</span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">/test&quot;</span>
+        <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_redirect</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>To make this pass, we implement the following code:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/users.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+  <span class="n">get</span> <span class="ss">:confirm</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s2">&quot;/confirm/:id/:code&quot;</span> <span class="k">do</span>
+    <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">unless</span> <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+    <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">unless</span> <span class="vi">@user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:code</span><span class="o">]</span><span class="p">)</span>
+    <span class="n">render</span> <span class="s1">&#39;users/confirm&#39;</span>
+  <span class="k">end</span>
+</pre></div>
+<h4>Mailer Template for Confirmation Email</h4>
+
+<p>If we are lazy we could add our confirmation email into the registration mailer. But if you think clearly, these are two
+things that have nothing to do with each other. So let&#39;s train our memory and create another mailer:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g mailer Confirmation confirmation_email
+      create  app/mailers/confirmation.rb
+      create  app/views/mailers/confirmation
+</pre></div>
+<p>Now let&#39;s fill out the confirmation mailer:</p>
+<div class="highlight"><pre>    <span class="c1"># app/mailers/confirmation.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">mailer</span> <span class="ss">:confirmation</span> <span class="k">do</span>
+      <span class="no">CONFIRMATION_URL</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:3000/confirm&quot;</span>
+
+      <span class="n">email</span> <span class="ss">:confirmation_email</span> <span class="k">do</span> <span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">link</span><span class="o">|</span>
+        <span class="n">from</span> <span class="s2">&quot;admin@job-vacancy.de&quot;</span>
+        <span class="n">subject</span> <span class="s2">&quot;Please confirm your account&quot;</span>
+        <span class="n">to</span> <span class="n">email</span>
+        <span class="n">locals</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="nb">name</span><span class="p">,</span> <span class="ss">:confirmation_link</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">CONFIRMATION_URL</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">link</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">render</span> <span class="s1">&#39;confirmation/confirmation_email&#39;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Fill the email template with &quot;confirmation-link-life&quot;:</p>
+<div class="highlight"><pre><span class="x">    # app/views/mailers/confirmation/confirmation_email.plain.erb</span>
+
+<span class="x">    Hi </span><span class="cp">&lt;%=</span> <span class="nb">name</span> <span class="cp">%&gt;</span><span class="x">,</span>
+
+<span class="x">    to take fully advantage of our platform you have to follow the following link:</span>
+
+<span class="x">    </span><span class="cp">&lt;%=</span> <span class="n">confirmation_link</span> <span class="cp">%&gt;</span><span class="x"></span>
+
+<span class="x">    Enjoy the possibility to find the right people for your jobs.</span>
+</pre></div>
+<p>And call this method to our users controller:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/users.rb</span>
+
+    <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+      <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+        <span class="n">deliver</span><span class="p">(</span><span class="ss">:registration</span><span class="p">,</span> <span class="ss">:registration_email</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="n">deliver</span><span class="p">(</span><span class="ss">:confirmation</span><span class="p">,</span> <span class="ss">:confirmation_email</span><span class="p">,</span> <span class="vi">@user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="vi">@user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+                <span class="vi">@user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="vi">@user</span><span class="o">.</span><span class="n">confirmation_code</span><span class="p">)</span>
+        <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+      <span class="k">else</span>
+        <span class="n">render</span> <span class="s1">&#39;users/new&#39;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<h4>Observer</h4>
+
+<p>In the chapter[TBD done find out how to reference to other chapters] we used a callback to build the functionality with
+the confirmation code generation and sending. If you think clearly we have flaws in our design:</p>
+
+<ol>
+<li>The controller is sending mails but this is not the responsibility of it.</li>
+<li><p>Our user model is blown up with authentication code.</p>
+
+<h2>Observers vs. Callbacks <a href="http://en.wikipedia.org/wiki/Observer_pattern">Observers</a> are a design pattern where an object has a list of its dependents called observers, and notifies them automatically if its state has changed by calling one of their methods. Observers means to be decoupling responsibility. They can serve as a connection point between your models and some other functionality of another subsystem. Observers &quot;lives&quot; longer in your application and can be attached/detached at any time. Callbacks life shorter - you pass it to a function to be called only once. Rule of the thumb: When you use callbacks with code that isn&#39;t directly related to your model, you better put this into an observer.</h2></li>
+</ol>
+
+<p>Here is a rough plan what we want to do:</p>
+
+<ul>
+<li>Create an observer in the models folder.</li>
+<li>Register the observer in app/app.rb.</li>
+<li>Attach the observer to the model so that the user model automatically calls the method of the observer.</li>
+</ul>
+
+<p>Let&#39;s create the observer with the name <code>user_observer</code> in the models folder</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user_observer.rb</span>
+
+    <span class="k">class</span> <span class="nc">UserObserver</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Observer</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="c1"># put in here the private methods of the users model</span>
+    <span class="k">end</span>
+</pre></div>
+<p>(Sadly, Padrino hasn&#39;t a generate command for this but I&#39;m having this on my list to create a pull request for this
+feature.)</p>
+
+<p>So we are defining our user observer with extends from the
+<a href="https://github.com/rails/rails-observers#active-record-observer">ActiveRecord::Observer</a>. Inside this class we can
+define any callbacks for each action we want to use. The most commons ones are <code>before_&lt;action&gt;</code> and <code>after_&lt;action&gt;</code>
+where <code>&lt;action&gt;</code> is the ActiveRecord trigger method like save, update, delete, show, or get.
+To see what we can move out of the user model let&#39;s have a look inside this model:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
+
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span> <span class="c1"># The other validations</span>
+
+      <span class="n">before_save</span> <span class="ss">:encrypt_confirmation_code</span><span class="p">,</span> <span class="ss">:if</span> <span class="o">=&gt;</span> <span class="ss">:registered?</span>
+
+      <span class="kp">private</span>
+      <span class="k">def</span> <span class="nf">encrypt_confirmation_code</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="n">set_confirmation_code</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">set_confirmation_code</span>
+        <span class="nb">require</span> <span class="s1">&#39;bcrypt&#39;</span>
+        <span class="n">salt</span> <span class="o">=</span> <span class="ss">BCrypt</span><span class="p">:</span><span class="ss">:Engine</span><span class="o">.</span><span class="n">generate_salt</span>
+        <span class="n">confirmation_code</span> <span class="o">=</span> <span class="ss">BCrypt</span><span class="p">:</span><span class="ss">:Engine</span><span class="o">.</span><span class="n">hash_secret</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="n">salt</span><span class="p">)</span>
+        <span class="n">normalize_confirmation_code</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">registered?</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">new_record?</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">normalize_confirmation_code</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+        <span class="n">confirmation_code</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>And refactor the code above into our observer:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user_observer.rb</span>
+
+    <span class="k">class</span> <span class="nc">UserObserver</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Observer</span>
+
+      <span class="kp">private</span>
+      <span class="k">def</span> <span class="nf">encrypt_confirmation_code</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">confirmation_code</span> <span class="o">=</span> <span class="n">set_confirmation_code</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">set_confirmation_code</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="nb">require</span> <span class="s1">&#39;bcrypt&#39;</span>
+        <span class="n">salt</span> <span class="o">=</span> <span class="ss">BCrypt</span><span class="p">:</span><span class="ss">:Engine</span><span class="o">.</span><span class="n">generate_salt</span>
+        <span class="n">confirmation_code</span> <span class="o">=</span> <span class="ss">BCrypt</span><span class="p">:</span><span class="ss">:Engine</span><span class="o">.</span><span class="n">hash_secret</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="n">salt</span><span class="p">)</span>
+        <span class="n">normalize_confirmation_code</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">normalize_confirmation_code</span><span class="p">(</span><span class="n">confirmation_code</span><span class="p">)</span>
+        <span class="n">confirmation_code</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>So far so good, but we also need to remove the callback <code>before_save :encrypt_confirmation_code, :if =&gt; :registered?</code>
+and we need also to transfer this logic:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user_observer.rb</span>
+
+    <span class="k">class</span> <span class="nc">UserObserver</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Observer</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="k">def</span> <span class="nf">before_save</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">new_record?</span>
+          <span class="n">encrypt_confirmation_code</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="no">JobVacancy</span><span class="o">.</span><span class="n">deliver</span><span class="p">(</span><span class="ss">:registration</span><span class="p">,</span> <span class="ss">:registration_email</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>If we have a fresh registered user we create an confirmation code and send him an welcome mail. Hmm, but what about the
+confirmation of our user? Right, we need to add an <code>after_save</code> method which send the confirmation code to the user:</p>
+<div class="highlight"><pre>    <span class="c1"># app/models/user_observer.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="k">def</span> <span class="nf">after_save</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+      <span class="no">JobVacancy</span><span class="o">.</span><span class="n">deliver</span><span class="p">(</span><span class="ss">:confirmation</span><span class="p">,</span> <span class="ss">:confirmation_email</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                         <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+                         <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                         <span class="n">user</span><span class="o">.</span><span class="n">confirmation_code</span><span class="p">)</span> <span class="k">unless</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span>
+    <span class="k">end</span>
+</pre></div>
+<p>We have cleaned up our design to this time. Before that if a user update his profile a new confirmation code will be
+send. We fixed this is with the <code>unless user.confirmation</code> line which means as long as the user is not confirmed, send
+him the confirmation code. We haven&#39;t any test for this kind and if you are curious how to do it, feel free to write
+a test for this and modify the observer code. I haven&#39;t found a way to test this -  maybe you use the
+<a href="https://www.relishapp.com/rspec/rspec-rails/v/2-4/docs/mocks/mock-model">mock_model</a> for your tests!
+We cleaned up our users controller from sending mail and this is the best solution, because in it&#39;s heart a controller
+just talks to the model and passing the ball to the right direction after an event.</p>
+
+<p>The last step we need to do is to register our observer in the <code>app.rb</code> and disable the observer for our specs</p>
+<div class="highlight"><pre>    <span class="c1"># app/app.rb.</span>
+    <span class="k">module</span> <span class="nn">JobVacancy</span>
+      <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="ss">Padrino</span><span class="p">:</span><span class="ss">:Application</span>
+        <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+        <span class="c1"># Activating the user_observer</span>
+        <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">add_observer</span> <span class="no">UserObserver</span><span class="o">.</span><span class="n">instance</span>
+        <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="c1"># spec/spec_helper.rb</span>
+
+    <span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">conf</span><span class="o">|</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">observers</span><span class="o">.</span><span class="n">disable</span> <span class="ss">:all</span> <span class="c1"># &lt;-- Turn &#39;em all off!</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>If you want to have an observer test[^test], you can use  the following one:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/models/user_observer_spec.rb</span>
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;UserObserver&quot;</span> <span class="k">do</span>
+      <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)}</span>
+      <span class="n">before</span> <span class="k">do</span>
+        <span class="vi">@observer</span> <span class="o">=</span> <span class="no">UserObserver</span><span class="o">.</span><span class="n">instance</span>
+        <span class="vi">@model</span> <span class="o">=</span> <span class="no">User</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;creates Mail::Message object before save&#39;</span> <span class="k">do</span>
+        <span class="vi">@observer</span><span class="o">.</span><span class="n">before_save</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be_instance_of</span><span class="p">(</span><span class="ss">Mail</span><span class="p">:</span><span class="ss">:Message</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;do not create Mail::Message if user already exist&#39;</span> <span class="k">do</span>
+        <span class="vi">@observer</span><span class="o">.</span><span class="n">before_save</span><span class="p">(</span><span class="vi">@model</span><span class="o">.</span><span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be_nil</span>
+      <span class="k">end</span>
+
+      <span class="n">it</span> <span class="s1">&#39;creates Mail::Message object after save&#39;</span> <span class="k">do</span>
+        <span class="vi">@observer</span><span class="o">.</span><span class="n">after_save</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be_instance_of</span><span class="p">(</span><span class="ss">Mail</span><span class="p">:</span><span class="ss">:Message</span><span class="p">)</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>But during writing this book I became different testing results when using <code>bundle exec rake spec</code> and <code>be rspec spec</code>
+and to go on with the book, I removed the test and disabled all observers for the application.</p>
+
+<p>[^test]: Got the inspiration from <a href="http://stackoverflow.com/questions/33048/how-would-you-test-observers-with-rspec-in-a-ruby-on-rails-application">stackoverflow</a></p>
+
+<h3>Sessions</h3>
+
+<p>Now that our users have the possibility to register and confirm on our page, we need to make it possible for our users
+to sign in. For handling login, we need to create a session controller:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g controller Sessions new create destroy
+      create  app/controllers/sessions.rb
+      create  app/helpers/sessions_helper.rb
+      create  app/views/sessions
+       apply  tests/rspec
+      create  spec/app/controllers/sessions_controller_spec.rb
+</pre></div>
+<p>We made a mistake during the generation - we forget to add the right action for our request. Before making the mistake
+to delete the generated files by hand with a couple of <code>rm&#39;s</code>, you can run a generator to destroy a controller:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g controller Sessions -d
+      remove  app/controllers/sessions.rb
+      remove  app/helpers/sessions_helper.rb
+      remove  app/views/sessions
+       apply  tests/rspec
+      remove  spec/app/controllers/sessions_controller_spec.rb
+</pre></div>
+<p>And run the generate command with the correct actions:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>padrino g controller Sessions get:new post:create delete:destroy
+      create  app/controllers/sessions.rb
+      create  app/helpers/sessions_helper.rb
+      create  app/views/sessions
+       apply  tests/rspec
+      create  spec/app/controllers/sessions_controller_spec.rb
+</pre></div>
+<p>Our session controller is naked:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/sessions_controller.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="o">.</span><span class="n">App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:sessions</span> <span class="k">do</span>
+
+      <span class="n">get</span> <span class="ss">:new</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s2">&quot;/login&quot;</span> <span class="k">do</span>
+      <span class="k">end</span>
+
+      <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+      <span class="k">end</span>
+
+      <span class="n">delete</span> <span class="ss">:destroy</span> <span class="k">do</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>So far so good before going on to write our tests first before we start with the implementation:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/controllers/sessions_controller_spec.rb</span>
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;SessionsController&quot;</span> <span class="k">do</span>
+      <span class="n">describe</span> <span class="s2">&quot;GET :new&quot;</span> <span class="k">do</span>
+        <span class="n">it</span> <span class="s2">&quot;load the login page&quot;</span> <span class="k">do</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;POST :create&quot;</span> <span class="k">do</span>
+        <span class="n">it</span> <span class="s2">&quot;stay on page if user is not found&quot;</span>
+        <span class="n">it</span> <span class="s2">&quot;stay on login page if user is not confirmed&quot;</span>
+        <span class="n">it</span> <span class="s2">&quot;stay on login page if user has wrong email&quot;</span>
+        <span class="n">it</span> <span class="s2">&quot;stay on login page if user has wrong password&quot;</span>
+        <span class="n">it</span> <span class="s2">&quot;redirect if user is correct&quot;</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;GET :logout&quot;</span> <span class="k">do</span>
+        <span class="n">it</span> <span class="s2">&quot;empty the current session&quot;</span>
+        <span class="n">it</span> <span class="s2">&quot;redirect to homepage if user is logging out&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<h2>Test-First development Is a term from <a href="http://en.wikipedia.org/wiki/Extreme_programming">Extreme Programming (XP)</a> and means that you first write down your tests before writing any code to solve it. This forces you to really think about what you are going to do. These tests prevent you from over engineering a problem because you has to make these tests green.</h2>
+
+<p>Here are now the tests for the <code>GET :new</code> and <code>POST :create</code> actions of our session controller:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/controllers/sessions_controller_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;SessionsController&quot;</span> <span class="k">do</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;GET :new&quot;</span> <span class="k">do</span>
+        <span class="n">it</span> <span class="s2">&quot;load the login page&quot;</span> <span class="k">do</span>
+          <span class="n">get</span> <span class="s2">&quot;/login&quot;</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">describe</span> <span class="s2">&quot;POST :create&quot;</span> <span class="k">do</span>
+        <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">build</span><span class="p">(</span><span class="ss">:user</span><span class="p">)}</span>
+        <span class="n">let</span><span class="p">(</span><span class="ss">:params</span><span class="p">)</span> <span class="p">{</span> <span class="n">attributes_for</span><span class="p">(</span><span class="ss">:user</span><span class="p">)}</span>
+
+        <span class="n">it</span> <span class="s2">&quot;stay on page if user is not found&quot;</span> <span class="k">do</span>
+          <span class="no">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:find_by_email</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="kp">false</span><span class="p">)</span>
+          <span class="n">post_create</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+
+        <span class="n">it</span> <span class="s2">&quot;stay on login page if user is not confirmed&quot;</span> <span class="k">do</span>
+          <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">=</span> <span class="kp">false</span>
+          <span class="no">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:find_by_email</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">post_create</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+
+        <span class="n">it</span> <span class="s2">&quot;stay on login page if user has wrong email&quot;</span> <span class="k">do</span>
+          <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;fake@google.de&quot;</span>
+          <span class="no">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:find_by_email</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">post_create</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+
+        <span class="n">it</span> <span class="s2">&quot;stay on login page if user has wrong password&quot;</span> <span class="k">do</span>
+          <span class="n">user</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+          <span class="no">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:find_by_email</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">post_create</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+        <span class="k">end</span>
+
+        <span class="n">it</span> <span class="s2">&quot;redirect if user is correct&quot;</span> <span class="k">do</span>
+          <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">=</span> <span class="kp">true</span>
+          <span class="no">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:find_by_email</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">post_create</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_redirect</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="kp">private</span>
+      <span class="k">def</span> <span class="nf">post_create</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">post</span> <span class="s2">&quot;sessions/create&quot;</span><span class="p">,</span> <span class="n">params</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>We are using <strong>mocking</strong> to make test what we want with the <code>User.should_receive(:find_by_email).and_return(user)</code>
+method. I was thinking at the first that mocking is something very difficult but it isn&#39;t Read it the method out loud
+ten times and you can guess whats going on. If our <code>User</code> object gets call from it&#39;s class method <code>find_by_email</code> it
+should return our user object. This method will simulate from calling an actual find method in our application - yeah
+we are mocking the actual call and preventing our tests from hitting the database and making it faster.actual call and
+preventing our tests from hitting the database and making it faster.</p>
+
+<p>Here is the code for our session controller to make the test green:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/session.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:sessions</span> <span class="k">do</span>
+
+      <span class="n">get</span> <span class="ss">:new</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s2">&quot;/login&quot;</span> <span class="k">do</span>
+        <span class="n">render</span> <span class="s1">&#39;sessions/new&#39;</span>
+      <span class="k">end</span>
+
+      <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_email</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:email</span><span class="o">]</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">params</span><span class="o">[</span><span class="ss">:password</span><span class="o">]</span>
+          <span class="n">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+        <span class="k">else</span>
+          <span class="n">render</span> <span class="s1">&#39;/sessions/new&#39;</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">get</span> <span class="ss">:destroy</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s1">&#39;/logout&#39;</span> <span class="k">do</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>When I started the tests I got some weird error messages of calling a method on a nil object and spend one hour till I
+found the issue. Do you remember the <code>UserObserver</code>? Exactly, this tiny piece of code is also activated for our tests
+and since we disable sending mails with the <code>set :delivery_method, :test</code> settings in <code>app.rb</code> I never received an
+mails. The simple to this problem was to add an option to in the <code>spec_helper.rb</code> to disable the observer:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/spec_helper.rb</span>
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">conf</span><span class="o">|</span>
+      <span class="n">conf</span><span class="o">.</span><span class="n">before</span> <span class="k">do</span>
+        <span class="no">User</span><span class="o">.</span><span class="n">observers</span><span class="o">.</span><span class="n">disable</span> <span class="ss">:all</span> <span class="c1"># &lt;-- turn of user observers for testing reasons, yeah</span>
+      <span class="k">end</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Running our tests:</p>
+<div class="highlight"><pre>    <span class="nv">$ </span>rspec spec/app/controllers/sessions_controller_spec.rb
+
+    SessionsController
+      GET :new
+        load the login page
+      POST :create
+        stay on page <span class="k">if </span>user is not found
+        stay on login page <span class="k">if </span>user is not confirmed
+        stay on login page <span class="k">if </span>user has wrong email
+        stay on login page <span class="k">if </span>user has wrong password
+        redirect <span class="k">if </span>user is correct
+      GET :logout
+        empty the current session <span class="o">(</span>PENDING: Not yet implemented<span class="o">)</span>
+        redirect to homepage <span class="k">if </span>user is logging out <span class="o">(</span>PENDING: Not yet implemented<span class="o">)</span>
+
+    Pending:
+      SessionsController GET :logout empty the current session
+        <span class="c"># Not yet implemented</span>
+        <span class="c"># ./spec/app/controllers/sessions_controller_spec.rb:52</span>
+      SessionsController GET :logout redirect to homepage <span class="k">if </span>user is logging out
+        <span class="c"># Not yet implemented</span>
+        <span class="c"># ./spec/app/controllers/sessions_controller_spec.rb:53</span>
+
+    Finished in 0.62495 seconds
+    8 examples, 0 failures, 2 pending
+</pre></div>
+<p>Before going on with implementing the logout action we need to think what happened after we login. We have to find a
+mechanism to enable the information of the logged in user in all our controllers and views. Of course, we will do it
+with sessions. When we created the session controller there was the line <code>create  app/helpers/sessions_helper.rb</code> --
+let&#39;s look into this file:</p>
+<div class="highlight"><pre>    <span class="c1"># app/helpers/sessions_helper.rb</span>
+
+    <span class="c1"># Helper methods defined here can be accessed in any controller or view in the application</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">helpers</span> <span class="k">do</span>
+      <span class="c1"># def simple_helper_method</span>
+      <span class="c1">#  ...</span>
+      <span class="c1"># end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>Yeah, Padrino is so friendly to print the purpose of this new file and it basically says what we want to do. Let&#39;s
+implement the main features:</p>
+<div class="highlight"><pre>    <span class="c1"># app/helpers/session_helper.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">helpers</span> <span class="k">do</span>
+      <span class="k">def</span> <span class="nf">current_user</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="vi">@current_user</span> <span class="o">=</span> <span class="n">user</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">current_user</span>
+        <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:current_user</span><span class="o">]</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">[</span><span class="ss">:current_user</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">current_user</span> <span class="o">=</span> <span class="n">user</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">sign_out</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:current_user</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">signed_in?</span>
+        <span class="o">!</span><span class="n">current_user</span><span class="o">.</span><span class="n">nil?</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>There&#39;s a lot of stuff going on in this helper:</p>
+
+<ul>
+<li><code>current_user</code>: Uses the <code>||=</code> notation. If the left hand-side isn&#39;t initialized, initialize the left hand-side with
+the right hand-side.</li>
+<li><code>sign_in(user)</code>: Uses the global <a href="http://www.sinatrarb.com/faq.html#sessions">session</a> method use the user Id as login
+information</li>
+<li><code>sign_out</code>: purges the <code>:current_user</code> field from our session.</li>
+<li><code>signed_in?</code>: We will use this small method within our whole application to display special actions which should only
+be available for authenticated users.</li>
+</ul>
+
+<h2>Why Sessions? When you request an URL in your browser you are using the HTTP/HTTPS protocol. This protocol is stateless that means that it doesn&#39;t save the state in which you are in your application. Web applications implement states with one of the following mechanisms: hidden variables in forms when sending data, cookies, or query strings (e.g. http://localhost:3000/login?user=test&amp;password=test). We are going to use cookies to save if a user is logged in and saving the user-Id in our session cookies under the key <code>:current_user</code>.</h2>
+
+<p>Now we are in a position to write tests for our <code>:destroy</code> action:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/app/controller/sessions_spec.rb</span>
+
+    <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+
+    <span class="n">describe</span> <span class="s2">&quot;SessionsController&quot;</span> <span class="k">do</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="n">describe</span> <span class="s2">&quot;GET :logout&quot;</span> <span class="k">do</span>
+        <span class="n">it</span> <span class="s2">&quot;empty the current session&quot;</span> <span class="k">do</span>
+          <span class="n">get_logout</span>
+          <span class="n">session</span><span class="o">[</span><span class="ss">:current_user</span><span class="o">].</span><span class="n">should</span> <span class="o">==</span> <span class="kp">nil</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_redirect</span>
+        <span class="k">end</span>
+
+        <span class="n">it</span> <span class="s2">&quot;redirect to homepage if user is logging out&quot;</span> <span class="k">do</span>
+          <span class="n">get_logout</span>
+          <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_redirect</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="kp">private</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+      <span class="k">def</span> <span class="nf">get_logout</span>
+          <span class="c1"># first arguments are params (like the ones out of an form), the second are environments variables</span>
+        <span class="n">get</span> <span class="s1">&#39;/logout&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">&#39;Hans&#39;</span><span class="p">,</span> <span class="ss">:password</span> <span class="o">=&gt;</span> <span class="s1">&#39;Test123&#39;</span> <span class="p">},</span> <span class="s1">&#39;rack.session&#39;</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:current_user</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="p">}</span>
+      <span class="k">end</span>
+</pre></div>
+<p>We use the our own <code>session</code> method in our tests to have access to the last response of our <code>rack.session</code>.
+What we need to achieve is to have access to
+<a href="http://rubydoc.info/github/rack/rack/master/Rack/Session/Abstract/SessionHash">Rack&#39;s SessionHash</a>. The
+definition of this method is part of our <code>spec_helper.rb</code> method:</p>
+<div class="highlight"><pre>    <span class="c1"># spec/spec_helper.rb</span>
+
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="c1"># have access to the session variables</span>
+    <span class="k">def</span> <span class="nf">session</span>
+      <span class="n">last_request</span><span class="o">.</span><span class="n">env</span><span class="o">[</span><span class="s1">&#39;rack.session&#39;</span><span class="o">]</span>
+    <span class="k">end</span>
+</pre></div>
+<p>And finally the implementation of the code that it make our tests green:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/session.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:sessions</span> <span class="k">do</span>
+      <span class="n">get</span> <span class="ss">:destroy</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s1">&#39;/logout&#39;</span> <span class="k">do</span>
+        <span class="n">sign_out</span>
+        <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</pre></div>
+<p>What we forget due to this point is to make use of the <code>sign_in(user)</code> method. Of, course we need use this during our
+session <code>:create</code> action:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controller/session.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:sessions</span> <span class="k">do</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+        <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+        <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">params</span><span class="o">[</span><span class="ss">:password</span><span class="o">]</span>
+          <span class="n">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+        <span class="k">else</span>
+          <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>Where can we test now our logic? The main application layout of our application should have a &quot;Login&quot; and &quot;Logout&quot; link
+according to the status of the user:</p>
+<div class="highlight"><pre>    <span class="c1"># app/views/application.rb</span>
+
+    <span class="o">&lt;!</span><span class="no">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">html</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;en-US&quot;</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= stylesheet_link_tag &#39;../assets/application&#39; %&gt;</span>
+<span class="sx">      &lt;%=</span> <span class="n">javascript_include_tag</span> <span class="s1">&#39;../assets/application&#39;</span> <span class="sx">%&gt;</span>
+<span class="sx">    &lt;/head&gt;</span>
+    <span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">==</span><span class="s2">&quot;container&quot;</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="n">nav</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;navigation&quot;</span><span class="o">&gt;</span>
+            <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+            <span class="o">&lt;</span><span class="sx">% if </span><span class="n">signed_in?</span> <span class="sx">%&gt;</span>
+<span class="sx">              &lt;%= link_to &#39;Logout&#39;, url_for(:sessions, :destroy) %&gt;</span>
+            <span class="o">&lt;</span><span class="sx">% else %&gt;</span>
+<span class="sx">            &lt;div class=&quot;span2&quot;&gt;</span>
+              <span class="o">&lt;%=</span> <span class="n">link_to</span> <span class="s1">&#39;Login&#39;</span><span class="p">,</span> <span class="n">url_for</span><span class="p">(</span><span class="ss">:sessions</span><span class="p">,</span> <span class="ss">:new</span><span class="p">)</span> <span class="sx">%&gt;</span>
+<span class="sx">            &lt;/div&gt;</span>
+            <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+<span class="sx">            &lt;/nav&gt;</span>
+          <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+<span class="sr">          ...</span>
+<span class="sr">        &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+<span class="sr">    &lt;/</span><span class="n">body</span><span class="o">&gt;</span>
+</pre></div>
+<p>With the change above we changed the default &quot;Registration&quot; entry in our header navigation to &quot;Login&quot;. We will add the
+link to the registration form now in the &#39;session/new&#39; view:</p>
+<div class="highlight"><pre>    <span class="c1"># app/views/sessions/new.erb</span>
+
+    <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Login</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+
+<span class="sr">    &lt;% form_tag &#39;/sessions</span><span class="o">/</span><span class="n">create</span><span class="s1">&#39; do %&gt;</span>
+
+<span class="s1">      &lt;%= label_tag :email %&gt;</span>
+<span class="s1">      &lt;%= text_field_tag :email %&gt;</span>
+
+<span class="s1">      &lt;%= label_tag :password %&gt;</span>
+<span class="s1">      &lt;%= password_field_tag :password %&gt;</span>
+<span class="s1">      &lt;p&gt;</span>
+<span class="s1">      &lt;%= submit_tag &quot;Sign up&quot;, :class =&gt; &quot;btn btn-primary&quot; %&gt;</span>
+<span class="s1">      &lt;/p&gt;</span>
+<span class="s1">    &lt;% end %&gt;</span>
+
+<span class="s1">    New on this platform? &lt;%= link_to &#39;</span><span class="no">Register</span><span class="err">&#39;</span><span class="p">,</span> <span class="n">url_for</span><span class="p">(</span><span class="ss">:users</span><span class="p">,</span> <span class="ss">:new</span><span class="p">)</span> <span class="o">%&gt;</span>
+</pre></div>
+<p>Here we are using the <a href="http://www.padrinorb.com/guides/application-helpers#form-helpers">form_tag</a> instead of the
+<code>form_for</code> tag because we don&#39;t want to render information about a certain model. We want to use the information of the
+session form to find a user in our database. So we can use the submitted inputs with <code>params[:email]</code> and
+<code>params[:password]</code> in the <code>:create</code> action in our action controller. My basic idea is to pass a variable to the
+rendering of method which says if we have an error or not and display the message accordingly. To handle this we are
+using the <code>:locals</code> option to create customized params for your views:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/sessions.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:sessions</span> <span class="k">do</span>
+
+      <span class="n">get</span> <span class="ss">:new</span><span class="p">,</span> <span class="ss">:map</span> <span class="o">=&gt;</span> <span class="s2">&quot;/login&quot;</span> <span class="k">do</span>
+        <span class="n">render</span> <span class="s1">&#39;/sessions/new&#39;</span><span class="p">,</span> <span class="ss">:locals</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:error</span> <span class="o">=&gt;</span> <span class="kp">false</span> <span class="p">}</span>
+      <span class="k">end</span>
+
+      <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_email</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:email</span><span class="o">]</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">params</span><span class="o">[</span><span class="ss">:password</span><span class="o">]</span>
+          <span class="n">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+        <span class="k">else</span>
+          <span class="n">render</span> <span class="s1">&#39;/sessions/new&#39;</span><span class="p">,</span> <span class="ss">:locals</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:error</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="p">}</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+
+    <span class="k">end</span>
+</pre></div>
+<p>Now we can simply use the <code>error</code> variable in our view:</p>
+<div class="highlight"><pre>    <span class="c1"># app/views/sessions/new.erb</span>
+
+    <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Login</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+
+<span class="sr">    &lt;% form_tag &#39;/sessions</span><span class="o">/</span><span class="n">create</span><span class="s1">&#39; do %&gt;</span>
+<span class="s1">      &lt;% if error %&gt;</span>
+<span class="s1">        &lt;div class=&quot;alert alert-error&quot;&gt;</span>
+<span class="s1">          &lt;h4&gt;Error&lt;/h4&gt;</span>
+<span class="s1">          Your Email and/or Password is wrong!</span>
+<span class="s1">        &lt;/div&gt;</span>
+<span class="s1">      &lt;% end %&gt;</span>
+<span class="s1">    ...</span>
+<span class="s1">    &lt;% end %&gt;</span>
+
+<span class="s1">    New on this platform? &lt;%= link_to &#39;</span><span class="no">Register</span><span class="err">&#39;</span><span class="p">,</span> <span class="n">url_for</span><span class="p">(</span><span class="ss">:users</span><span class="p">,</span> <span class="ss">:new</span><span class="p">)</span> <span class="o">%&gt;</span>
+</pre></div>
+<p>The last thing we want to is to give the user feedback about what the action he was recently doing. Like that it would
+be nice to give feedback of the success of the logged and logged out action. We can do this with short flash messages
+above our application which will fade away after a certain amount of time. To do this we can use Padrino&#39;s flash
+mechanism is build on
+<a href="http://guides.rubyonrails.org/action_controller_overview.html#the-flash">Rails flash message implementation</a>.</p>
+
+<p>And here is the implementation of the code:</p>
+<div class="highlight"><pre><span class="x">    # app/views/application.erb</span>
+
+<span class="x">    &lt;!DOCTYPE html&gt;</span>
+<span class="x">    &lt;html lang=&quot;en-US&quot;&gt;</span>
+<span class="x">    &lt;head&gt;</span>
+<span class="x">      &lt;title&gt;Job Vacancy - find the best jobs&lt;/title&gt;</span>
+<span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">stylesheet_link_tag</span> <span class="s1">&#39;../assets/application&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">javascript_include_tag</span> <span class="s1">&#39;../assets/application&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">    &lt;/head&gt;</span>
+<span class="x">    &lt;body&gt;</span>
+<span class="x">      &lt;div class=&quot;container&quot;&gt;</span>
+<span class="x">        </span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">          &lt;div class=&quot;row&quot; id=&quot;flash&quot;&gt;</span>
+<span class="x">            &lt;div class=&quot;span9 offset3 alert alert-success&quot;&gt;</span>
+<span class="x">              </span><span class="cp">&lt;%=</span> <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x">&lt;/p&gt;</span>
+<span class="x">            &lt;/div&gt;</span>
+<span class="x">          &lt;/div&gt;</span>
+<span class="x">        </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">      &lt;/div&gt;</span>
+<span class="x">    &lt;/body&gt;</span>
+</pre></div>
+<p>Next we need implement the flash messages in our session controller:</p>
+<div class="highlight"><pre>    <span class="c1"># app/controllers/sessions.rb</span>
+
+    <span class="ss">JobVacancy</span><span class="p">:</span><span class="ss">:App</span><span class="o">.</span><span class="n">controllers</span> <span class="ss">:sessions</span> <span class="k">do</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+      <span class="n">post</span> <span class="ss">:create</span> <span class="k">do</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by_email</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:email</span><span class="o">]</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmation</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">params</span><span class="o">[</span><span class="ss">:password</span><span class="o">]</span>
+          <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You have successfully logged out.&quot;</span>
+          <span class="n">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+          <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+        <span class="k">else</span>
+          <span class="n">render</span> <span class="s1">&#39;/sessions/new&#39;</span><span class="p">,</span> <span class="ss">:locals</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:error</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="p">}</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+    <span class="k">end</span>
+</pre></div>
+<p>If you now login successfully you will see the message but it will stay there forever. But we don&#39;t want to have this
+message displayed the whole time, so we will use jQuery&#39;s <a href="http://api.jquery.com/fadeOut/">fadeOut method</a> to get rid of
+the message. Since we are first writing our own customized JavaScript, let&#39;s create the file with the following content:</p>
+<div class="highlight"><pre><span class="x">    # app/views/application.erb</span>
+
+<span class="x">    &lt;!DOCTYPE html&gt;</span>
+<span class="x">    &lt;html lang=&quot;en-US&quot;&gt;</span>
+<span class="x">    &lt;head&gt;</span>
+<span class="x">      &lt;title&gt;Job Vacancy - find the best jobs&lt;/title&gt;</span>
+<span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">stylesheet_link_tag</span> <span class="s1">&#39;../assets/application&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">javascript_include_tag</span> <span class="s1">&#39;../assets/application&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">    &lt;/head&gt;</span>
+<span class="x">    &lt;body&gt;</span>
+<span class="x">      &lt;div class==&quot;container&quot;&gt;</span>
+<span class="x">        </span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">          &lt;div class=&quot;row&quot; id=&quot;flash&quot;&gt;</span>
+<span class="x">            &lt;div class=&quot;span9 offset3 alert alert-success&quot;&gt;</span>
+<span class="x">              </span><span class="cp">&lt;%=</span> <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x">&lt;/p&gt;</span>
+<span class="x">            &lt;/div&gt;</span>
+<span class="x">            &lt;script type=&quot;text/javascript&quot;&gt;</span>
+<span class="x">              $(function(){</span>
+<span class="x">                  $(&quot;#flash&quot;).fadeOut(2000);</span>
+<span class="x">              });</span>
+<span class="x">            &lt;/script&gt;</span>
+<span class="x">          &lt;/div&gt;</span>
+<span class="x">        </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">      &lt;/div&gt;</span>
+<span class="x">    &lt;/body&gt;</span>
+</pre></div>
+<p>Feel free to add the <code>flash[:notice]</code> function when the user has registered and confirmed successfully on our platform.
+If you have problems you can check
+<a href="https://github.com/matthias-guenther/job-vacancy/commit/f7233bf2edc7da89f02adf7f030a090fc74b3f2d">my commit</a>.</p>
+
+
+      <div class="prevnext">
+          <a class="prev" href="/output/02-02-creation-of-models.html">&laquo; Prev</a>
+      </div>
+
+    </div>
+    <script>
+      $(function() {
+        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
+        prettyPrint();
+      });
+    </script>
+  </body>
+
+</html>
+
