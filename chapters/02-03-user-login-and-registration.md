@@ -2,7 +2,7 @@
 
 In traditional frameworks you would generate a user with a `user` model and a `users_controller` with the actions
 `new`, `create`, `update`, and `delete`. And you can't forget about security these days it would be nice to to have
-something at hand to save At the end we would need to find a method of safely storing the password for the user.
+something at hand to save atemail the end we would need to find a method of safely storing the password for the user.
 
 
 Of course, we could use you don't have to reinvent the wheel you can use Padrino's beautiful
@@ -283,7 +283,7 @@ The new thing about the controller command above is the `get:new` option. This w
 `users/new`.
 
 
-#### Sign up Form
+#### Sign Up Form
 
 The stage is set: We have the model with the tested constraints, and a controller for the user which handles the action.
 Time to create a sign up form for getting new users on our platform. For this case we can use the `form_for` helper.
@@ -458,7 +458,7 @@ This isn't something we want to ship to our customers.
 
 
 Let's change this by using
-[error_message_on method](http://www.padrinorb.com/api/Padrino/Helpers/FormHelpers.html#error_message_on-instance_method)
+[error\_message\_on method](http://www.padrinorb.com/api/Padrino/Helpers/FormHelpers.html#error_message_on-instance_method)
 which returns a string containing the error message attached to the method on the object:
 
 
@@ -559,7 +559,7 @@ configuration file of our application `app.rb`:
         set :delivery_method, :smtp => {
           :address => 'smtp.gmail.com',
           :port => 587,
-          :user_name => '<your-gmail-account-address',
+          :user_name => '<your-gmail-account-address>',
           :password => '<secret>',
           :authentication => :plain,
         }
@@ -575,7 +575,7 @@ Let's get through all the different options:
 - `:address`: The SMTP mail address.
 - `:port`: The port of the mail address.
 - `:user_name`: The name of the SMTP address.
-- `:password`: The password of your SMPT address.
+- `:password`: The password of your SMTP address.
 - `:authentication`: Specify if your mail server requires authentication. The default setting is plain meaning that
    the password is not encrypted. `:login` will send the password [Base64 encoded](https://en.wikipedia.org/wiki/Base64),  [:cram_md5](http://en.wikipedia.org/wiki/CRAM-MD5) is a challenge/response authentication mechanism .
 - `:domain`: This key is set up for [HELO checking](http://en.wikipedia.org/wiki/Anti-spam_techniques#HELO.2FEHLO_checking).
@@ -621,7 +621,7 @@ the mail is send::
 {: lang="bash" }
     DEBUG - Sending email to: lordmatze@gmail.com
     Date: Sun, 14 Apr 2013 09:17:38 +0200
-    From: admin@job-vacancy.org
+    From: admin@job-vacancy.de
     To: lordmatze@gmail.com
     Message-ID: <516a581243fb3_498a446f81c295e3@mg.mail>
     Subject: Welcome!
@@ -822,7 +822,7 @@ content as hash elements as arguments.
       subject "Welcome!"
       locals :name => name, :email=> email
       render 'registration/registration_email'
-      add_file :filename => 'welcome.pdf', :content => File.open("#{Padrino.root}/app/assets/pdfs/welcome.pdf") { |f| f.read}
+      add_file :filename => 'welcome.pdf', :content => File.open("#{Padrino.root}/app/assets/pdf/welcome.pdf") { |f| f.read}
     end
 
 
@@ -889,9 +889,9 @@ I> MIME types. This means that MIME headers are optional for plain text emails a
 I> read correctly by a clients being able to read MIME encoded messages.
 
 
-#### sending email with confirmation link
+#### Sending Email with Confirmation Link
 
-the basic steps for implementing the logic of email confirmation are the following:
+The basic steps for implementing the logic of email confirmation are the following:
 
 
 - we need to add the *confirmation_code* and *confirmation* attributes in our user model.
@@ -907,16 +907,16 @@ the basic steps for implementing the logic of email confirmation are the followi
 - protect our controller methods and views to prevent security issues.
 
 
-i> ## why confirmation mail
-i>
-i> check that the user actually signed up for the account and actually wants it. this also helps you from spamming your
-i> platform is going to be floated with billions of users. another usage of this information is to give your users a
-i> chance to change their password and/or stay in contact with them to inform them about updates.
+I> ## Why Confirmation Mail
+I>
+I> Check that the user actually signed up for the account and actually wants it. This also helps you from spamming your
+I> platform is going to be floated with billions of users. Another usage of this information is to give your users a
+I> chance to change their password and/or stay in contact with them to inform them about updates.
 
 
-### add confirmation code and confirmation attributes to the user model
+### Add Confirmation Code and Confirmation Attributes to the User Model
 
-create a good migration which fits to the task we want to do:
+Create a good migration which fits to the task we want to do:
 
 
 {: lang="bash" }
@@ -925,7 +925,7 @@ create a good migration which fits to the task we want to do:
       create  db/migrate/005_add_confirmation_code_and_confirmation_to_users.rb
 
 
-now let's add the fields to a migration:
+Now let's add the fields to a migration:
 
 
 {: lang="ruby" }
@@ -947,7 +947,7 @@ now let's add the fields to a migration:
     end
 
 
-we added the `:default` option which sets the confirmation for every user to false if a new one is registered. now
+We added the `:default` option which sets the confirmation for every user to false if a new one is registered. now
 let's migrate our production and test database to this new event:
 
 
@@ -958,9 +958,9 @@ let's migrate our production and test database to this new event:
 
 #### My Tests are Slow ...
 
-During writing this book I discovered various strange behavior for my tests because I was writing data into my
-test database. So the tests weren't really reliable because some worked only when the database is fresh with no
-preexisting entries. One solution would be to clean up the database before each run:
+During writing this book I discovered various strange behavior for my tests because I was writing data into my test
+database. So the tests weren't really reliable because some worked only when the database is fresh with no preexisting
+entries. One solution would be to clean up the database before each run:
 
 
 {: lang="bash" }
@@ -1594,7 +1594,7 @@ If you want to have an observer test[^test], you can use  the following one:
     end
 
 
-But during writing this book I became different testing results when using `bundle exec rake spec` and `be rspec spec`
+But during writing this book I became different testing results when using `bundle exec rake spec` and `bundle exec rspec spec`
 and to go on with the book, I removed the test and disabled all observers for the application.
 
 [^test]: Got the inspiration from [stackoverflow](http://stackoverflow.com/questions/33048/how-would-you-test-observers-with-rspec-in-a-ruby-on-rails-application)
@@ -1646,7 +1646,7 @@ Our session controller is naked:
 {: lang="ruby" }
     # app/controllers/sessions_controller.rb
 
-    JobVacancy:.App.controllers :sessions do
+    JobVacancy:App.controllers :sessions do
 
       get :new, :map => "/login" do
       end
@@ -1762,7 +1762,7 @@ We are using **mocking** to make test what we want with the `User.should_receive
 method. I was thinking at the first that mocking is something very difficult but it isn't Read it the method out loud
 ten times and you can guess whats going on. If our `User` object gets call from it's class method `find_by_email` it
 should return our user object. This method will simulate from calling an actual find method in our application - yeah
-we are mocking the actual call and preventing our tests from hitting the database and making it faster.actual call and
+we are mocking the actual call and preventing our tests from hitting the database and making it faster. Actual call and
 preventing our tests from hitting the database and making it faster.
 
 
@@ -1899,12 +1899,12 @@ There's a lot of stuff going on in this helper:
   the right hand-side.
 - `sign_in(user)`: Uses the global [session](http://www.sinatrarb.com/faq.html#sessions) method use the user Id as login
   information
-- `sign_out`: purges the `:current_user` field from our session.
+- `sign_out`: Purges the `:current_user` field from our session.
 - `signed_in?`: We will use this small method within our whole application to display special actions which should only
   be available for authenticated users.
 
 
-I>## Why Sessions?
+I>## Why Sessions and how does sign_out work?
 I>
 I> When you request an URL in your browser you are using the HTTP/HTTPS protocol. This protocol is stateless that means
 I> that it doesn't save the state in which you are in your application. Web applications implement states with one of
@@ -1912,7 +1912,14 @@ I> the following mechanisms: hidden variables in forms when sending data, cookie
 I> http://localhost:3000/login?user=test&password=test).
 I>
 I> We are going to use cookies to save if a user is logged in and saving the user-Id in our session cookies under the
-I> key `:current_user`.
+I> `:current_user` key.
+I>
+I> What the delete method does is the following: It will look into the last request in your application inside the
+I> session information hash and delete the `current_user` key. And the sentence in code
+I> `browser.last_request.env['rack.session'].delete(:current_user)`. If you want to explore more of the internal of an
+I> application I highly recommend you the [Pry](https://github.com/pry/pry). You can throw in at any part of your
+I> application `binding.pry` and have full access to all variables.
+
 
 
 Now we are in a position to write tests for our `:destroy` action:
@@ -1977,7 +1984,7 @@ And finally the implementation of the code that it make our tests green:
     end
 
 
-What we forget due to this point is to make use of the `sign_in(user)` method. Of, course we need use this during our
+What we forget due to this point is to make use of the `sign_in(user)` method. Of course we need use this during our
 session `:create` action:
 
 
@@ -2198,5 +2205,4 @@ the message. Since we are first writing our own customized JavaScript, let's cre
 
 Feel free to add the `flash[:notice]` function when the user has registered and confirmed successfully on our platform.
 If you have problems you can check
-[my commit](https://github.com/matthias-guenther/job-vacancy/commit/f7233bf2edc7da89f02adf7f030a090fc74b3f2d).
-
+[my commit](https://github.com/wikimatze/job-vacancy/commit/f7233bf2edc7da89f02adf7f030a090fc74b3f2d).

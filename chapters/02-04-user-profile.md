@@ -1,6 +1,6 @@
 ## User Profile
 
-To update a use profile we need and `edit` and `update` action.... Let's beginning with writing tests for the edit
+To update a use profile we need and `edit` and `update` action. Let's beginning with writing tests for the `edit`
 section:
 
 
@@ -23,7 +23,7 @@ section:
     end
 
 
-The interesting part above is `.twice` call. We need to use this because when want to edit a user we need to load this
+The interesting part above is the `.twice` call. We need to use this because when want to edit a user we need to load this
 profile and load it again if we are having an input error.
 
 
@@ -133,12 +133,55 @@ And finally the edit form:
 
 
 If you now open the browser at http://jobvacancy.de:3000/users/37/edit  you can edit the user even if you are not logged
-into the application. Security error.
+into the application. Ups, this is huge security issue.
 
 
 ### Authorisation
 
-We want our user to be logged in and edit only his profile.
+We want our user to be logged in and edit only his profile. In the previous parts of the book we wrote a lot of
+functions for our `sessions_helper.rb` without any tests. Before going on, let's see why testing a simple helper is not
+easy in Padrino.
+
+
+{: lang="ruby" }
+    # app/helpers/users_helper.rb
+
+    JobVacancy::App.helpers do
+      def bla
+        "bla"
+      end
+    end
+
+
+This syntax is a shortcut for:
+
+
+{: lang="ruby" }
+    helpers = Module.new do
+      def bla
+        "bla"
+      end
+    end
+
+    JobVacancy::App.helpers helpers
+
+
+The helpers are an anonymous module and its hard to reference something that is anonymous. The solution is easy: make
+the module explicit:
+
+
+{: lang="ruby" }
+    # app/helpers/users_helper.rb
+
+    module UsersHelper
+      def bla
+        "bla"
+      end
+    end
+
+    JobVacancy::App.helpers UsersHelper
+
+
 
 Need to test helper ... http://stackoverflow.com/questions/11302394/how-to-use-padrino-helper-methods-in-rspec
 

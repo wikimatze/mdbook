@@ -1,99 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if IE 9]>    <html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js" lang="en" itemscope itemtype="http://schema.org/Product"> <!--<![endif]-->
   <head>
-    <meta charset=utf-8" />
-    <title>Muss noch gemacht werden und dynamisch gesetzt sein </title>
-    <meta name="author" content="Matthias Guenther" />
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Padrino Book</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Learn Padrino - The Elegant Ruby Web Framework" />
+    <meta name="author" content="Matthias Günther">
 
-    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
-    <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-    <style text="text/css">
-      /*
-       * jquery.tocify.css 1.4.0
-       * Author: @gregfranko
-       */
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/apple-touch-icon.png">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 
-      /* The Table of Contents container element */
-      #toc {
-          width: 20%;
-          max-height: 90%;
-          overflow: auto;
-          margin-left: -22%;
-          position: fixed;
-          border: 1px solid #ccc;
-          webkit-border-radius: 6px;
-          moz-border-radius: 6px;
-          border-radius: 6px;
-      }
-
-      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
-      #toc ul, #toc li {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          border: none;
-          line-height: 30px;
-      }
-
-      /* Top level header elements */
-      .header {
-          text-indent: 10px;
-      }
-
-      /* Top level subheader elements.  These are the first nested items underneath a header element. */
-      .sub-header {
-          text-indent: 20px;
-          display: none;
-      }
-
-      /* Makes the font smaller for all subheader elements. */
-      .sub-header li {
-          font-size: 12px;
-      }
-
-      /* Further indents second level subheader elements. */
-      .sub-header .sub-header {
-          text-indent: 30px;
-      }
-
-      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
-      .sub-header .sub-header .sub-header {
-          text-indent: 40px;
-      }
-
-      /* Twitter Bootstrap Override Style */
-      .nav-list > li > a, .nav-list .nav-header {
-          margin: 0px;
-      }
-
-      /* Twitter Bootstrap Override Style */
-      .nav-list > li > a {
-          padding: 5px;
-      }
-
-    </style>
+    <link rel="stylesheet" href="./css/gumby.css">
+    <link rel="stylesheet" href="./css/syntax.css">
+    <link rel="stylesheet" href="./css/style.css">
   </head>
 
   <body>
-  <div id="toc"></div>
-    <div id="content">
+    <div class="toc"></div>
 
-      <div class="prevnext">
-          <a class="prev" href="/output/01-03-installing-ruby-with-rbenv.html">&laquo; Prev</a>
-          <a class="next" href="/output/01-05-conclusion.html">Next &raquo;</a>
-      </div>
+    <div class="pretty navbar row" id="nav4">
+      <a class="toggle" gumby-trigger="#nav4 > ul" href="#"><i class="icon-menu"></i></a>
+      <h1 class="four columns logo">
+        <a href="/">
+          <img src="/images/gumby_mainlogo.png" gumby-retina="">
+        </a>
+      </h1>
+      <ul class="eight columns">
+        <li><a href="https://leanpub.com/padrino">Get <i class="icon-basket"></i></a></li>
+        <li><a href="/book_index.html">Read<i class="icon-book-open"></i></a></li>
+        <li><a href="/newsletter.html">Update <i class="icon-mail"></i></a></li>
+        <li><a href="/about.html">About <i class="icon-user"></i></a></li>
+      </ul>
+    </div>
 
-      <h2>Hello world</h2>
+    <div id="container">
+      <div class="row">
+        <div class="twelve columns">
+          <div id="generated-toc"></div>
+          <div class="navigation-header">
+              <div class="medium btn pill-left default">
+                <a class="prev" href="/01-03-installing-ruby-with-rbenv.html">&laquo; Prev</a>
+              </div>
+            <div class="medium metro rounded btn default"><a href="/book_index.html">Index</a></div>
+              <div class="medium btn pill-right default">
+                <a class="next" href="/01-05-conclusion.html">Next &raquo;</a>
+              </div>
+          </div>
+
+          <h2>Hello world</h2>
 
 <p>The basic layout of our application is displayed on the following image application:</p>
 
@@ -104,8 +70,8 @@ your first program.</p>
 
 <p>Now, get your hands dirty and start coding.</p>
 
-<p>First of all we need to install the padrino gem. We are using the last stable version of Padrino (during the release of
-this book it is version <strong>0.11.1</strong>). Execute this command.</p>
+<p>First of all we need to install the <em>padrino gem</em>. We are using the last stable version of Padrino (during the release of
+this book it is version <strong>0.11.2</strong>). Execute this command.</p>
 <div class="highlight"><pre>    <span class="nv">$ </span>gem install padrino
 </pre></div>
 <p>This will install all necessary dependencies and makes you ready to get started. Now we will generate a fresh new
@@ -156,7 +122,7 @@ in all following examples.</li>
        force  .components
 
     <span class="o">=================================================================</span>
-    hello-world is ready <span class="k">for </span>development!
+    hello-world is ready <span class="k">for</span> development!
     <span class="o">=================================================================</span>
     <span class="nv">$ </span><span class="nb">cd</span> ./hello-world
     <span class="nv">$ bundle</span>
@@ -173,7 +139,7 @@ bundler, execute the following command and check the console output:</p>
 <div class="highlight"><pre>    <span class="nv">$ </span>gem install bundler
         Fetching: bundler-1.3.5.gem <span class="o">(</span>100%<span class="o">)</span>
         Successfully installed bundler-1.3.5
-        1 gem installed
+        <span class="m">1</span> gem installed
 </pre></div>
 <p>Now we have everything to run the <code>bundle</code> command to install our dependencies:</p>
 <div class="highlight"><pre>    <span class="nv">$ </span><span class="nb">cd </span>hello-world
@@ -187,7 +153,7 @@ bundler, execute the following command and check the console output:</p>
 <p>Let&#39;s open the file <code>app/app.rb</code> (think of it as the root controller of your app) and insert the following before the
 last <code>end</code> in the file:</p>
 <div class="highlight"><pre>    <span class="k">module</span> <span class="nn">HelloWorld</span>
-      <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="ss">Padrino</span><span class="p">:</span><span class="ss">:Application</span>
+      <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="no">Padrino</span><span class="o">::</span><span class="no">Application</span>
 
         <span class="n">get</span> <span class="s2">&quot;/&quot;</span> <span class="k">do</span>
           <span class="s2">&quot;Hello World!&quot;</span>
@@ -204,27 +170,28 @@ last <code>end</code> in the file:</p>
 
 <p>Congratulations! You&#39;ve built your first Padrino app.</p>
 
-<h3>Folder structure of a Padrino app</h3>
+<h2>Folder structure of Padrino</h2>
 
 <p>Navigating through the various parts of a project is essential. Thus we will go through the basic file structure of the
 <em>hello-world</em> project. The app consists of the following parts:</p>
-<div class="highlight"><pre>    |-- Gemfile
-    |-- Gemfile.lock
-    |-- app
-    |   |-- app.rb
-    |   |-- controllers
-    |   |-- helpers
-    |   <span class="sb">`</span>-- views
-    |       <span class="sb">`</span>-- layouts
-    |-- config
-    |   |-- apps.rb
-    |   <span class="sb">`</span>-- boot.rb
-    |-- config.ru
-    |-- public
-    |   |-- favicon.ico
-    |   |-- images
-    |   |-- javascripts
-    |   <span class="sb">`</span>-- stylesheets
+<div class="highlight"><pre>    <span class="p">|</span>-- Gemfile
+    <span class="p">|</span>-- Gemfile.lock
+    <span class="p">|</span>-- app
+    <span class="p">|</span>   <span class="p">|</span>-- app.rb
+    <span class="p">|</span>   <span class="p">|</span>-- controllers
+    <span class="p">|</span>   <span class="p">|</span>-- helpers
+    <span class="p">|</span>   <span class="sb">`</span>-- views
+    <span class="p">|</span>       <span class="sb">`</span>-- layouts
+    <span class="p">|</span>-- config
+    <span class="p">|</span>   <span class="p">|</span>-- apps.rb
+    <span class="p">|</span>   <span class="p">|</span>-- boot.rb
+    <span class="p">|</span>   <span class="sb">`</span>-- database.rb
+    <span class="p">|</span>-- config.ru
+    <span class="p">|</span>-- public
+    <span class="p">|</span>   <span class="p">|</span>-- favicon.ico
+    <span class="p">|</span>   <span class="p">|</span>-- images
+    <span class="p">|</span>   <span class="p">|</span>-- javascripts
+    <span class="p">|</span>   <span class="sb">`</span>-- stylesheets
     <span class="sb">`</span>-- tmp
 </pre></div>
 <p>We will go through each part.</p>
@@ -237,7 +204,8 @@ snapshot of all the gems and their versions that have been installed.</li>
 <li><strong>app</strong>: Contains the &quot;executable&quot; files of your project with controllers, helpers, and views of your app.
 
 <ul>
-<li><strong>app.rb</strong>: The primary configuration file of your application.</li>
+<li><strong>app.rb</strong>: The primary configuration file of your application. Here you can enable or disable various options like
+observers, your mail settings, specify the location of your asset folder, enable sessions, and other options</li>
 <li><strong>controller</strong>: The controllers make the model data available to the view. They define the URL routes that are
 callable in your app and defines the actions that are triggered by requests.</li>
 <li><strong>helper</strong>: Helpers are small snippet of code that can be called in your views to help you to prevent repetition -
@@ -250,30 +218,91 @@ existing app under different subdomains.
 
 <ul>
 <li><strong>apps.rb</strong>: Allows you to configure a compound app that consists of several smaller apps. Each app has his own
-default route form which requests will be handled by that app.</li>
-<li><strong>boots.rb</strong>: Basic settings for your app which will be run when you start the app.</li>
+default route form which requests will be handled by that app. Here you can set site wide configs like caching,
+csrf, mounting different apps.</li>
+<li><strong>boots.rb</strong>: Basic settings for your app which will be run when you start the app. Here you can turn on or off the
+error logginh, enable internationalization and localization, load any prerquisites like HTML5 or Mailer helpers</li>
+<li><strong>database.rb</strong>: Define different adapters for all the environments in your application.</li>
 </ul></li>
 <li><strong>config.ru</strong>: Contains the complete configuration options of the app, such as which port the app listens to, whenever
 it uses other Padrino apps as middleware and more. This file will be used when Padrino is started from the command
 line.</li>
-<li><strong>public</strong>: Folder where you put static resources like images folder, JavaScript files, and style sheets.</li>
-<li><strong>tmp</strong>: This directory holds temporary files for intermediate processing.</li>
+<li><strong>public</strong>: Folder where you put static resources like images folder, JavaScript files, and style sheets. You can use
+for your asset packaging sinatra-assetpack or sprockets</li>
+<li><strong>tmp</strong>: This directory holds temporary files for intermediate processing like cacge, tests, local mails, ....</li>
 </ul>
 
 
-      <div class="prevnext">
-          <a class="prev" href="/output/01-03-installing-ruby-with-rbenv.html">&laquo; Prev</a>
-          <a class="next" href="/output/01-05-conclusion.html">Next &raquo;</a>
-      </div>
+          <div class="navigation-footer">
+              <div class="medium btn pill-left default">
+                <a class="prev" href="/01-03-installing-ruby-with-rbenv.html">&laquo; Prev</a>
+              </div>
+            <div class="medium metro rounded btn default"><a href="/book_index.html">Index</a></div>
+              <div class="medium btn pill-right default">
+                <a class="next" href="/01-05-conclusion.html">Next &raquo;</a>
+              </div>
+          </div>
 
+          <div class="whoring">
+            <div id="disqus_thread"></div>
+            <script type="text/javascript">
+              /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+              var disqus_shortname = 'wikimatze'; // required: replace example with your forum shortname
+
+              /* * * DON'T EDIT BELOW THIS LINE * * */
+              (function() {
+                  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                  dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+              })();
+            </script>
+            <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+            <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="container">
+      <div class="row">
+        <hr>
+        <footer>
+          <nav>
+            &copy; <a href="http://wikimatze.de">Matthias Günther</a>
+            &bull;
+            <a href="/about.html">About</a>
+            &bull;
+            <a href="https://twitter.com/padrinobook">Twitter</a>
+            &bull;
+            <a href="/contact.html">Contact</a>
+            &bull;
+            <a href="/imprint.html">Imprint</a>
+          </nav>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Grab Google CDN's jQuery, fall back to local if offline -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/libs/jquery-1.9.1.min.js"><\/script>')</script>
+
+    <script type="text/javascript" src="js/libs/modernizr-2.6.2.min.js"></script>
+    <script src="js/libs/gumby.min.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+
     <script>
-      $(function() {
-        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
-        prettyPrint();
+      window._gaq = [['_setAccount','UA-41475542-1'],['_trackPageview'],['_trackPageLoadTime']];
+      Modernizr.load({
+      load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
+      });
+    </script>
+
+    <script src="js/toc.js"></script>
+    <script>
+      $('.toc').toc({
       });
     </script>
   </body>
-
 </html>
 

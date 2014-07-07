@@ -23,7 +23,7 @@ Explanation of the fields commands:
 - **-e erb**: We are using [ERB](http://ruby-doc.org/stdlib-1.9.3/libdoc/erb/rdoc/ERB.html "ERB") (*embedded ruby*)
   markup for writing HTML templates. An alternative is [Haml](http://haml.info/ "Haml") or [Slim](http://slim-lang.com/
   "Slim"), but to keep the project as simple as possible, we stick with ERB. Feel free to use them if you like to.
-- **-a sqlite**: Our ORM[^orm] database adapter is [sqlite](http://www.sqlite.org/ "SQLite"). It is easy to install
+- **-a sqlite**: Our ORM[^orm] database adapter is [SQLite](http://www.sqlite.org/ "SQLite"). It is easy to install
   because the whole database is saved in a text file.
 
 
@@ -36,36 +36,34 @@ another mocking library like [rr](https://rubygems.org/gems/rr "rr") or [mocha](
 You can use a vast array of other options when generating your new Padrino app, this table shows the currently available
 options:
 
-<pre class="table">
-|Component | Default | Aliases | Options
-|----------|---------|---------|------------------------------------------------------------------------------|
-|orm       | none    | -d      | mongoid, activerecord, datamapper, couchrest, mongomatic, ohm, ripple, sequel|
-|test      | none    | -t      | bacon, shoulda, cucumber, testspec, riot, rspec, minitest                    |
-|script    | none    | -s      | prototype, rightjs, jquery, mootools, extcore, dojo                          |
-|renderer  | haml    | -e      | erb, haml, slim, liquid                                                      |
-|stylesheet| none    | -c      | sass, less, scss, compass                                                    |
-|mock      | none    | -m      | rr, mocha                                                                    |
-</pre>
+
+- `orm`: Available options are: `activerecord, couchrest,  datamapper, mongoid, mongomatic,
+  ohm, ripple`, and `sequel`. The command line alias is `-d`.
+- `test`: Availabe options are: `bacon, cucumber, minitest, riot, rspec, should`, and `testspec`. The command line
+  alias is `-t`.
+- `script`: Available options are: `dojo, extcore, jquery, mootools, prototype`, and `rightjs`. The command line alias
+  is `-s`.
+- `renderer`: Available options are: `erb, haml, liquid`, and `slim`. The command line alias is `-e`.
+- `stylesheet`: Available options are: `compass, less, sass`, and `scss`. The command line alias is `-c`.
+- `mock`: Available options are: `mocha` and `rr`.
+
+
+The default value of each option is none. So to in order to use them you have to specify the option you want to use.
 
 
 Besides the `project` option for generating new Padrino apps, the following table illustrates the other generators
 available:
 
 
-<pre class="table">
-|Option     | Description
-|-----------|------------------------------------------------------------------------------------------------|
-|project    | Generates a completely new app from the scratch.                                               |
-|app        | You can define other apps to be mounted in your main app.                                      |
-|mailer     | Creating new mailers within your app.                                                          |
-|controller | A controller takes date from the models and puts them into view that are rendered.             |
-|model      | Models describe data objects of your application.                                              |
-|migration  | Migrations simplify changing the database schema.                                              |
-|plugin     | Creating new Padrino projects based on a template file - it's like a list of commands.         |
-|           | which create your new app.                                                                     |
-|admin      | A very nice built-in admin dashboard.                                                          |
-|admin_page | Creates for an existing model the CRUD operation for the admin interface                       |
-</pre>
+- `admin`: A very nice built-in admin dashboard.
+- `admin_page`: Creates for an existing model the CRUD operation for the admin interface.
+- `app`: You can define other apps to be mounted in your main app.
+- `controller`: A controller takes date from the models and puts them into view that are rendered.
+- `mailer`: Creating new mailers within your app.
+- `migration`: Migrations simplify changing the database schema.
+- `model`: Models describe data objects of your application.
+- `project`: Generates a completely new app from the scratch.
+- `plugin`: Creating new Padrino projects based on a template file - it's like a list of commands.
 
 
 Later, when *the time comes*, we will add extra gems, for now though we'll grab the current gems using
@@ -232,7 +230,7 @@ We will go through each line:
 - `render :erb, 'page/about'` - This action tells us that we want to render an the *erb* file *page/about*. This file is
   actually located at `app/views/page/about.erb` file. Normally the views are placed under
   *app/views/<controller-name>/<action-name>.<ending>*  Instead of using an ERB templates, you could also use `:haml`,
-  or another template language. If you are lazy, you can leave the   option for the rendering option completely out and
+  or another template language. If you are lazy, you can leave the option for the rendering option completely out and
   leave the matching completely for Padrino.
 
 
@@ -326,7 +324,7 @@ Next we need to include the style sheet in our app template for the whole app:
 
 The `stylesheet_link_tag` points to the *bootstrap.min.css* in you app *public/stylesheets* directory and will
 automatically create a link to this stylesheet. The `javascript_include_tag` does the same as `stylesheet_link_tag` for
-your JavaScript files in the *public/javascript* directory.
+your JavaScript files in the *public/javascripts* directory.
 
 
 ### Using Sprockets to Manage the Asset Pipeline
@@ -362,9 +360,9 @@ Next we need to move all our assets from the public folder in the assets folder:
 {: lang="bash" }
     $ cd <path-to-your-padrino-app>
     $ mkdir -p app/assets
-    $ mv app/public/javascript app/assets
-    $ mv app/public/stylesheets app/assets
-    $ mv app/public/images app/assets
+    $ mv public/javascript app/assets
+    $ mv public/stylesheets app/assets
+    $ mv public/images app/assets
 
 
 Now we have to register Padrino-Sprockets in this application:
@@ -407,7 +405,7 @@ First we are loading the `bootstrap` default css, then `bootstrap-response`, and
 check the order of the loaded CSS as a comment above your application without ever have to look into the source of it.
 
 
-Next let's have a look into our JavaScript stylesheets:
+Next let's have a look into our JavaScript files:
 
 
 {: lang="javascript" }
@@ -422,7 +420,7 @@ Next let's have a look into our JavaScript stylesheets:
     //= require_tree .
 
 
-The interesting thing here is the `require_tree .` option. This options tells Sprockets to include all
+The interesting thing here is the `require_tree .` option. This option tells Sprockets to include all
 JavaScript files in the assets folder with no specific order.
 
 
@@ -569,7 +567,7 @@ behavior by writing tests first, then the code. We use the [RSpec](http://rspec.
 this.
 
 
-Remember when we created the *page-controller* with `padrino g controller page`? Thereby, Padrino created a
+Remember when we created the *page-controller* with `padrino g controller page` ? Thereby, Padrino created a
 corresponding spec file *spec/app/controller/page_controller_spec.rb* which has the following content:
 
 

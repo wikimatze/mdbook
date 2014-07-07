@@ -1,99 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if IE 9]>    <html class="no-js ie9" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js" lang="en" itemscope itemtype="http://schema.org/Product"> <!--<![endif]-->
   <head>
-    <meta charset=utf-8" />
-    <title>Muss noch gemacht werden und dynamisch gesetzt sein </title>
-    <meta name="author" content="Matthias Guenther" />
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Padrino Book</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Learn Padrino - The Elegant Ruby Web Framework" />
+    <meta name="author" content="Matthias Günther">
 
-    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
-    <link rel="stylesheet" href="/css/syntax.css" type="text/css" />
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-    <script type="text/javascript" src="/js/jquery.tocify.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-    <style text="text/css">
-      /*
-       * jquery.tocify.css 1.4.0
-       * Author: @gregfranko
-       */
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/apple-touch-icon.png">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
 
-      /* The Table of Contents container element */
-      #toc {
-          width: 20%;
-          max-height: 90%;
-          overflow: auto;
-          margin-left: -22%;
-          position: fixed;
-          border: 1px solid #ccc;
-          webkit-border-radius: 6px;
-          moz-border-radius: 6px;
-          border-radius: 6px;
-      }
-
-      /* The Table of Contents is composed of multiple nested unordered lists.  These styles remove the default styling of an unordered list because it is ugly. */
-      #toc ul, #toc li {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          border: none;
-          line-height: 30px;
-      }
-
-      /* Top level header elements */
-      .header {
-          text-indent: 10px;
-      }
-
-      /* Top level subheader elements.  These are the first nested items underneath a header element. */
-      .sub-header {
-          text-indent: 20px;
-          display: none;
-      }
-
-      /* Makes the font smaller for all subheader elements. */
-      .sub-header li {
-          font-size: 12px;
-      }
-
-      /* Further indents second level subheader elements. */
-      .sub-header .sub-header {
-          text-indent: 30px;
-      }
-
-      /* Further indents third level subheader elements. You can continue this pattern if you have more nested elements. */
-      .sub-header .sub-header .sub-header {
-          text-indent: 40px;
-      }
-
-      /* Twitter Bootstrap Override Style */
-      .nav-list > li > a, .nav-list .nav-header {
-          margin: 0px;
-      }
-
-      /* Twitter Bootstrap Override Style */
-      .nav-list > li > a {
-          padding: 5px;
-      }
-
-    </style>
+    <link rel="stylesheet" href="./css/gumby.css">
+    <link rel="stylesheet" href="./css/syntax.css">
+    <link rel="stylesheet" href="./css/style.css">
   </head>
 
   <body>
-  <div id="toc"></div>
-    <div id="content">
+    <div class="toc"></div>
 
-      <div class="prevnext">
-          <a class="prev" href="/output/02-01-creating-a-new-application.html">&laquo; Prev</a>
-          <a class="next" href="/output/02-03-user-login-and-registration.html">Next &raquo;</a>
-      </div>
+    <div class="pretty navbar row" id="nav4">
+      <a class="toggle" gumby-trigger="#nav4 > ul" href="#"><i class="icon-menu"></i></a>
+      <h1 class="four columns logo">
+        <a href="/">
+          <img src="/images/gumby_mainlogo.png" gumby-retina="">
+        </a>
+      </h1>
+      <ul class="eight columns">
+        <li><a href="https://leanpub.com/padrino">Get <i class="icon-basket"></i></a></li>
+        <li><a href="/book_index.html">Read<i class="icon-book-open"></i></a></li>
+        <li><a href="/newsletter.html">Update <i class="icon-mail"></i></a></li>
+        <li><a href="/about.html">About <i class="icon-user"></i></a></li>
+      </ul>
+    </div>
 
-      <h2>Creation Of The Models</h2>
+    <div id="container">
+      <div class="row">
+        <div class="twelve columns">
+          <div id="generated-toc"></div>
+          <div class="navigation-header">
+              <div class="medium btn pill-left default">
+                <a class="prev" href="/02-01-creating-a-new-application.html">&laquo; Prev</a>
+              </div>
+            <div class="medium metro rounded btn default"><a href="/book_index.html">Index</a></div>
+              <div class="medium btn pill-right default">
+                <a class="next" href="/02-03-user-login-and-registration.html">Next &raquo;</a>
+              </div>
+          </div>
+
+          <h2>Creation Of The Models</h2>
 
 <h3>User Model</h3>
 
@@ -113,7 +79,7 @@ too:</p>
 <p><strong>user.rb</strong></p>
 <div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
 
-    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
     <span class="k">end</span>
 </pre></div>
 <p>All we have is an empty class which inherits from
@@ -150,7 +116,7 @@ made for after all:</p>
          <span class="c"># ./spec/app/models/user_spec.rb:6:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
 
     Finished in 0.041 seconds
-    1 example, 1 failure
+    <span class="m">1</span> example, <span class="m">1</span> failure
 
     Failed examples:
 </pre></div>
@@ -160,7 +126,7 @@ yet. And how do we create one? Here, migrations enter the stage.</p>
 <p>Migrations helps you to change the database in an ordered manner. Let&#39;s have a look at our first migration:</p>
 <div class="highlight"><pre>    <span class="n">db</span><span class="o">/</span><span class="n">migrate</span><span class="o">/</span><span class="mo">001</span><span class="n">_create_users</span><span class="o">.</span><span class="n">rb</span>
 
-    <span class="k">class</span> <span class="nc">CreateUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+    <span class="k">class</span> <span class="nc">CreateUsers</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
       <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
         <span class="n">create_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
           <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:name</span>
@@ -181,7 +147,7 @@ to run this migration:</p>
 <div class="highlight"><pre>    <span class="nv">$ </span>padrino rake ar:migrate
 
     <span class="o">=</span>&gt; Executing Rake ar:migrate ...
-      DEBUG -  <span class="o">(</span>0.1ms<span class="o">)</span>  <span class="k">select </span>sqlite_version<span class="o">(</span>*<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>0.1ms<span class="o">)</span>  <span class="k">select</span> sqlite_version<span class="o">(</span>*<span class="o">)</span>
       DEBUG -  <span class="o">(</span>143.0ms<span class="o">)</span>  CREATE TABLE <span class="s2">&quot;schema_migrations&quot;</span> <span class="o">(</span><span class="s2">&quot;version&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span> NOT NULL<span class="o">)</span>
       DEBUG -  <span class="o">(</span>125.2ms<span class="o">)</span>  CREATE UNIQUE INDEX <span class="s2">&quot;unique_schema_migrations&quot;</span> ON <span class="s2">&quot;schema_migrations&quot;</span> <span class="o">(</span><span class="s2">&quot;version&quot;</span><span class="o">)</span>
       DEBUG -  <span class="o">(</span>0.2ms<span class="o">)</span>  SELECT <span class="s2">&quot;schema_migrations&quot;</span>.<span class="s2">&quot;version&quot;</span> FROM <span class="s2">&quot;schema_migrations&quot;</span>
@@ -198,26 +164,26 @@ properly:</p>
 <div class="highlight"><pre>    <span class="nv">$ </span>sqlite3 db/job_vacancy_development.db
 
     SQLite version 3.7.13 2012-06-11 02:05:22
-    Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for </span>instructions
+    Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for</span> instructions
     Enter SQL statements terminated with a <span class="s2">&quot;;&quot;</span>
     sqlite&gt; .tables
     schema_migrations  users
     sqlite&gt; .schema users
-    CREATE TABLE <span class="s2">&quot;users&quot;</span> <span class="o">(</span><span class="s2">&quot;id&quot;</span> INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, <span class="s2">&quot;name&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span>, <span class="s2">&quot;email&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span>, <span class="s2">&quot;created_at&quot;</span> datetime NOT NULL, <span class="s2">&quot;updated_at&quot;</span> datetime NOT NULL<span class="o">)</span>;
+    CREATE TABLE <span class="s2">&quot;users&quot;</span> <span class="o">(</span><span class="s2">&quot;id&quot;</span> INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, <span class="s2">&quot;name&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span>, <span class="s2">&quot;email&quot;</span> varchar<span class="o">(</span>255<span class="o">)</span>, <span class="s2">&quot;created_at&quot;</span> datetime NOT NULL, <span class="s2">&quot;updated_at&quot;</span> datetime NOT NULL<span class="o">)</span><span class="p">;</span>
     sqlite&gt; .exit
 </pre></div>
 <p>Let&#39;s have a look on the <code>config/database.rb</code> file to understand more about the different databases:</p>
-<div class="highlight"><pre>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:development</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight"><pre>    <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:development</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">:adapter</span> <span class="o">=&gt;</span> <span class="s1">&#39;sqlite3&#39;</span><span class="p">,</span>
       <span class="ss">:database</span> <span class="o">=&gt;</span> <span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;job_vacancy_development.db&#39;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:production</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:production</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">:adapter</span> <span class="o">=&gt;</span> <span class="s1">&#39;sqlite3&#39;</span><span class="p">,</span>
       <span class="ss">:database</span> <span class="o">=&gt;</span> <span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;job_vacancy_production.db&#39;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:test</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">configurations</span><span class="o">[</span><span class="ss">:test</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span>
       <span class="ss">:adapter</span> <span class="o">=&gt;</span> <span class="s1">&#39;sqlite3&#39;</span><span class="p">,</span>
       <span class="ss">:database</span> <span class="o">=&gt;</span> <span class="no">Padrino</span><span class="o">.</span><span class="n">root</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;job_vacancy_test.db&#39;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -251,7 +217,7 @@ Lets&#39;s be sure that all databases are created:</p>
          <span class="c"># ./spec/app/models/user_spec.rb:6:in `block (2 levels) in &lt;top (required)&gt;&#39;</span>
 
     Finished in 0.04847 seconds
-    1 example, 1 failure
+    <span class="m">1</span> example, <span class="m">1</span> failure
 
     Failed examples:
 
@@ -273,7 +239,7 @@ environment. Let&#39;s fix this with the following command:</p>
       can be created
 
     Finished in 0.05492 seconds
-    1 example, 0 failures
+    <span class="m">1</span> example, <span class="m">0</span> failures
 </pre></div>
 <p>How can we run all the tests in our application and see if everything is working? Just execute <code>padrino rake spec</code>
 to run all tests in the <code>spec/</code> folder:</p>
@@ -285,7 +251,7 @@ to run all tests in the <code>spec/</code> folder:</p>
       can be created
 
     Finished in 0.05589 seconds
-    1 example, 0 failures
+    <span class="m">1</span> example, <span class="m">0</span> failures
     /home/helex/.rbenv/versions/1.9.3-p392/bin/ruby -S rspec ./spec/app/controllers/page_controller_spec.rb -fs --color
 
     PageController
@@ -297,7 +263,7 @@ to run all tests in the <code>spec/</code> folder:</p>
         renders the :home view
 
     Finished in 0.20325 seconds
-    3 examples, 0 failures
+    <span class="m">3</span> examples, <span class="m">0</span> failures
 </pre></div>
 <p>This is very handy to make sure that you didn&#39;t broke anything in the existing codebase when you are working on a next
 feature. Run these regression tests frequently and enjoy it to see your app growing feature by feature.</p>
@@ -330,7 +296,7 @@ A job offer consists of the following attributes:</p>
       DEBUG -  <span class="o">(</span>0.4ms<span class="o">)</span>  SELECT <span class="s2">&quot;schema_migrations&quot;</span>.<span class="s2">&quot;version&quot;</span> FROM <span class="s2">&quot;schema_migrations&quot;</span>
        INFO - Migrating to CreateUsers <span class="o">(</span>1<span class="o">)</span>
        INFO - Migrating to CreateJobOffers <span class="o">(</span>2<span class="o">)</span>
-      DEBUG -  <span class="o">(</span>0.3ms<span class="o">)</span>  <span class="k">select </span>sqlite_version<span class="o">(</span>*<span class="o">)</span>
+      DEBUG -  <span class="o">(</span>0.3ms<span class="o">)</span>  <span class="k">select</span> sqlite_version<span class="o">(</span>*<span class="o">)</span>
       DEBUG -  <span class="o">(</span>0.2ms<span class="o">)</span>  begin <span class="nv">transaction</span>
     <span class="o">==</span>  CreateJobOffers: <span class="nv">migrating</span> <span class="o">================================================</span>
     -- create_table<span class="o">(</span>:job_offers<span class="o">)</span>
@@ -366,7 +332,7 @@ automatically all corresponding jobs for this user&quot;.</p>
 We define the association between the user and the job offers as shown in the following expression:</p>
 <div class="highlight"><pre>    <span class="c1"># app/models/user.rb</span>
 
-    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+    <span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
       <span class="n">has_many</span> <span class="ss">:job_offers</span>
     <span class="k">end</span>
 </pre></div>
@@ -375,7 +341,7 @@ We define the association between the user and the job offers as shown in the fo
 <p>The receiving object of the <em>has_many</em> relationship defines that it belongs to exactly one object, and therefore:</p>
 <div class="highlight"><pre>    <span class="c1"># app/models/job_offer.rb</span>
 
-    <span class="k">class</span> <span class="nc">JobOffer</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+    <span class="k">class</span> <span class="nc">JobOffer</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
       <span class="n">belongs_to</span> <span class="ss">:user</span>
     <span class="k">end</span>
 </pre></div>
@@ -390,7 +356,7 @@ column <code>user_id</code> to the <code>job_offers table</code>. For this chang
     create  db/migrate/003_add_user_id_to_job_offers.rb
 </pre></div>
 <p>Let&#39;s take a look at the created migration:</p>
-<div class="highlight"><pre>    <span class="k">class</span> <span class="nc">AddUserIdToJobOffers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+<div class="highlight"><pre>    <span class="k">class</span> <span class="nc">AddUserIdToJobOffers</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
       <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
         <span class="n">change_table</span> <span class="ss">:joboffers</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
           <span class="n">t</span><span class="o">.</span><span class="n">integer</span> <span class="ss">:user_id</span>
@@ -445,10 +411,10 @@ different approach and use the Padrino console this time.  All you have to do is
 connect to the database and execute a &#39;SELECT&#39; statement::</p>
 <div class="highlight"><pre>    <span class="nv">$ </span>sqlite3 db/job_vacancy_development.db
     SQLite version 3.7.13 2012-06-11 02:05:22
-    Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for </span>instructions
+    Enter <span class="s2">&quot;.help&quot;</span> <span class="k">for</span> instructions
     Enter SQL statements terminated with a <span class="s2">&quot;;&quot;</span>
-    sqlite&gt; SELECT * FROM users;
-    1|Matthias Günther|matthias.guenther|2012-12-26 08:32:51.323349|2012-12-26 08:32:51.323349
+    sqlite&gt; SELECT * FROM users<span class="p">;</span>
+    1<span class="p">|</span>Matthias Günther<span class="p">|</span>matthias.guenther<span class="p">|</span>2012-12-26 08:32:51.323349<span class="p">|</span>2012-12-26 08:32:51.323349
     sqlite&gt;.exit
 </pre></div>
 <p>Since we have an user, it&#39;s time to some job offers too:</p>
@@ -483,7 +449,7 @@ connect to the database and execute a &#39;SELECT&#39; statement::</p>
 <p>Now it&#39;s time to test our association between the user and the job-offer model. We will use the <code>find_by_id</code> method
 to get the user from our database, and the <code>job_offers</code> method to get all the job-offers from the user.</p>
 <div class="highlight"><pre>    &gt;&gt; <span class="nv">user</span> <span class="o">=</span> User.find_by_id<span class="o">(</span>1<span class="o">)</span>
-      DEBUG - User Load <span class="o">(</span>0.6ms<span class="o">)</span>  SELECT <span class="s2">&quot;users&quot;</span>.* FROM <span class="s2">&quot;users&quot;</span> WHERE <span class="s2">&quot;users&quot;</span>.<span class="s2">&quot;id&quot;</span> <span class="o">=</span> 1 LIMIT <span class="nv">1</span>
+      DEBUG - User Load <span class="o">(</span>0.6ms<span class="o">)</span>  SELECT <span class="s2">&quot;users&quot;</span>.* FROM <span class="s2">&quot;users&quot;</span> WHERE <span class="s2">&quot;users&quot;</span>.<span class="s2">&quot;id&quot;</span> <span class="o">=</span> <span class="m">1</span> LIMIT <span class="nv">1</span>
       <span class="o">=</span>&gt; <span class="c">#&lt;User id: 1, name: &quot;Matthias Günther&quot;, email: &quot;matthias.guenther&quot;, created_at: &quot;2012-12-26 08:32:51&quot;, updated_at:</span>
       <span class="s2">&quot;2012-12-26 08:32:51&quot;</span>&gt;
     &gt;&gt; user.job_offers
@@ -638,8 +604,8 @@ expressions if we add make the following change to our <code>spec_helper.rb</cod
 <div class="highlight"><pre>    <span class="c1"># spec/spec_helper.rb</span>
 
     <span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">conf</span><span class="o">|</span>
-      <span class="n">conf</span><span class="o">.</span><span class="n">include</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Test</span><span class="o">::</span><span class="no">Methods</span>
-      <span class="n">conf</span><span class="o">.</span><span class="n">include</span> <span class="ss">FactoryGirl</span><span class="p">:</span><span class="ss">:Syntax</span><span class="o">::</span><span class="no">Methods</span>
+      <span class="n">conf</span><span class="o">.</span><span class="n">include</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Test</span><span class="o">::</span><span class="no">Methods</span>
+      <span class="n">conf</span><span class="o">.</span><span class="n">include</span> <span class="no">FactoryGirl</span><span class="o">::</span><span class="no">Syntax</span><span class="o">::</span><span class="no">Methods</span>
     <span class="k">end</span>
 </pre></div>
 <p>Now we can change our test to:</p>
@@ -665,19 +631,76 @@ expressions if we add make the following change to our <code>spec_helper.rb</cod
     <span class="k">end</span>
 </pre></div>
 
-      <div class="prevnext">
-          <a class="prev" href="/output/02-01-creating-a-new-application.html">&laquo; Prev</a>
-          <a class="next" href="/output/02-03-user-login-and-registration.html">Next &raquo;</a>
-      </div>
+          <div class="navigation-footer">
+              <div class="medium btn pill-left default">
+                <a class="prev" href="/02-01-creating-a-new-application.html">&laquo; Prev</a>
+              </div>
+            <div class="medium metro rounded btn default"><a href="/book_index.html">Index</a></div>
+              <div class="medium btn pill-right default">
+                <a class="next" href="/02-03-user-login-and-registration.html">Next &raquo;</a>
+              </div>
+          </div>
 
+          <div class="whoring">
+            <div id="disqus_thread"></div>
+            <script type="text/javascript">
+              /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+              var disqus_shortname = 'wikimatze'; // required: replace example with your forum shortname
+
+              /* * * DON'T EDIT BELOW THIS LINE * * */
+              (function() {
+                  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                  dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+              })();
+            </script>
+            <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+            <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="container">
+      <div class="row">
+        <hr>
+        <footer>
+          <nav>
+            &copy; <a href="http://wikimatze.de">Matthias Günther</a>
+            &bull;
+            <a href="/about.html">About</a>
+            &bull;
+            <a href="https://twitter.com/padrinobook">Twitter</a>
+            &bull;
+            <a href="/contact.html">Contact</a>
+            &bull;
+            <a href="/imprint.html">Imprint</a>
+          </nav>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Grab Google CDN's jQuery, fall back to local if offline -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/libs/jquery-1.9.1.min.js"><\/script>')</script>
+
+    <script type="text/javascript" src="js/libs/modernizr-2.6.2.min.js"></script>
+    <script src="js/libs/gumby.min.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+
     <script>
-      $(function() {
-        var toc = $("#toc").tocify({ selectors: "h2, h3, h4" }).data("toc-tocify");
-        prettyPrint();
+      window._gaq = [['_setAccount','UA-41475542-1'],['_trackPageview'],['_trackPageLoadTime']];
+      Modernizr.load({
+      load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
+      });
+    </script>
+
+    <script src="js/toc.js"></script>
+    <script>
+      $('.toc').toc({
       });
     </script>
   </body>
-
 </html>
 
