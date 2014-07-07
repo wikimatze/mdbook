@@ -1,14 +1,14 @@
 # Gems
 require 'tilt'
-require 'pry'
-require 'github/markup'
+require 'redcarpet'
+require 'github-markup'
 require 'pygments.rb'
 
 # local classes
 require './chapter_links'
 
 CHAPTER_DIRECTORY = "chapters"
-OUTPUT_DIRECTORY = "../_site"
+OUTPUT_DIRECTORY = "output"
 CHAPTERS = Dir["#{CHAPTER_DIRECTORY}/**/**"].sort
 
 
