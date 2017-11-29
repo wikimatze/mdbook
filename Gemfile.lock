@@ -1,24 +1,19 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    coderay (1.1.0)
-    github-markup (1.2.1)
-      posix-spawn (~> 0.3.8)
-    method_source (0.8.2)
-    posix-spawn (0.3.8)
-    pry (0.10.0)
+    coderay (1.1.2)
+    github-markup (1.6.2)
+    method_source (0.9.0)
+    multi_json (1.12.2)
+    pry (0.11.3)
       coderay (~> 1.1.0)
-      method_source (~> 0.8.1)
-      slop (~> 3.4)
-    pygments.rb (0.6.0)
-      posix-spawn (~> 0.3.6)
-      yajl-ruby (~> 1.1.0)
-    rack (1.5.2)
-    rake (10.3.2)
-    slop (3.5.0)
-    tilt (2.0.1)
+      method_source (~> 0.9.0)
+    pygments.rb (1.2.0)
+      multi_json (>= 1.0.0)
+    rack (2.0.3)
+    rake (12.3.0)
+    tilt (2.0.8)
     watchr (0.7)
-    yajl-ruby (1.1.0)
 
 PLATFORMS
   ruby
@@ -31,3 +26,6 @@ DEPENDENCIES
   rake
   tilt
   watchr
+
+BUNDLED WITH
+   1.16.0.pre.3
